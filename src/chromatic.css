@@ -1,0 +1,24 @@
+#keyboard {
+    position: relative;
+}
+.key {
+    position: absolute;
+    font-size: 8pt;
+}
+.key.white {
+    height: 100px;
+    width: 32px;
+    z-index: 0;
+    background-color: white;
+    color: black;
+}
+.key.black {
+    height: 50px;
+    width: 28px;
+    z-index: 1;
+    background-color: black;
+    color: white;
+}
+.key.active {
+    background-color: gray;
+}
