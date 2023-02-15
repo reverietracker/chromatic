@@ -1,12 +1,10 @@
 <!doctype html>
 <html>
     <head>
-        <title>chromatic</title>
-        <script src="chromatic.js"></script>
+        <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
     <body>
-        <button id="play">play</button>
-        <input type="range" min="0" max="100" value="100" id="master-volume">
+        <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="500" id="master-volume">
         <ul id="keyboard"></ul>
     </body>
 </html>
