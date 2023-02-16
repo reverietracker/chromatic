@@ -7,6 +7,7 @@ export const waveType = {
 export class Wave {
     constructor() {
         this.waveType = waveType.SQUARE;
+        this.transpose = 0;
         this.decayTo = 0;
         this.decaySpeed = 16;
         this.phaseMin = 16;
@@ -15,7 +16,8 @@ export class Wave {
         this.vibratoDepth = 0;
         this.vibratoPeriod = 16;
     }
-    getFrameCallback(frequency) {
+    getFrameCallback(originalFrequency) {
+        const frequency = originalFrequency * 2**(this.transpose / 12);
         return (frame) => {
             const phaseCentre = (this.phaseMin + this.phaseMax) / 2;
             const phaseAmplitude = (this.phaseMax - this.phaseMin) / 2;

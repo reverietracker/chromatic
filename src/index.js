@@ -14,7 +14,7 @@ let currentKey = null;
 
 class Key {
     constructor(container, oct, n){
-        const noteVal = (oct*12 + n) - 57;
+        const noteVal = (oct*12 + n) - 33;
         const noteName = NOTE_NAMES[n] + oct;
         this.frequency = 440 * 2**(noteVal/12);
         this.button = document.createElement('button');
@@ -24,7 +24,7 @@ class Key {
         } else {
             this.button.classList.add('white');
         }
-        this.button.style.left = (((oct-3) * 7 + KEY_POSITIONS[n]) * 32) + 'px';
+        this.button.style.left = (((oct-1) * 7 + KEY_POSITIONS[n]) * 32) + 'px';
         this.button.innerText = noteName;
         container.appendChild(this.button);
         this.button.addEventListener("mousedown", () => {
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     const keyboard = document.getElementById("keyboard");
-    for (let oct=3; oct<6; oct++) {
+    for (let oct=1; oct<4; oct++) {
         for (let n=0; n<12; n++) {
             new Key(keyboard, oct, n);
         }
@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             phaseFieldset.removeAttribute('disabled');
         }
     });
+    initControl("transpose", "transpose");
     initControl("phase-min", "phaseMin");
     initControl("phase-max", "phaseMax");
     initControl("phase-period", "phasePeriod");
