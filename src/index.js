@@ -2,10 +2,11 @@ import "./chromatic.css";
 
 import { AudioController } from "./audio";
 import { SquareWave } from "./instruments";
+import { Scope } from "./scope";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
-const audioController = new AudioController();
+const audio = new AudioController();
 
 const waveform = new SquareWave();
 let currentKey = null;
@@ -33,19 +34,19 @@ class Key {
         currentKey = this;
         this.button.classList.add('active');
         const frameCallback = waveform.getFrameCallback(this.frequency);
-        audioController.play(frameCallback);
+        audio.play(frameCallback);
     }
     release() {
         this.button.classList.remove('active');
-        audioController.stop();
+        audio.stop();
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const masterVolumeControl = document.getElementById("master-volume");
-    audioController.setVolume(masterVolumeControl.value / 1000);
+    audio.setVolume(masterVolumeControl.value / 1000);
     masterVolumeControl.addEventListener('change', () => {
-        audioController.setVolume(masterVolumeControl.value / 1000);
+        audio.setVolume(masterVolumeControl.value / 1000);
     })
 
     const keyboard = document.getElementById("keyboard");
@@ -57,4 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mouseup', () => {
         if (currentKey) currentKey.release();
     });
+
+    const scopeCanvas = document.getElementById("scope");
+    const scope = new Scope(scopeCanvas);
+    audio.on('frame', (frameData) => {
+        scope.drawFrame(frameData);
+    })
 });

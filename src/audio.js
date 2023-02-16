@@ -1,7 +1,9 @@
+import { EventEmitter } from 'events';
 import { TICSynth } from './ticsynth';
 
-export class AudioController {
+export class AudioController extends EventEmitter {
     constructor() {
+        super();
         this.audioStarted = false;
         this.ticSynth = null;
         this.gainNode = null;
@@ -27,7 +29,11 @@ export class AudioController {
         }
         this.audioStarted = true;
 
+        this.ticSynth.frameNumber = 0;
         this.ticSynth.frameCallback = frameCallback;
+        this.ticSynth.onFrame = (frameData) => {
+            this.emit('frame', frameData);
+        }
     }
     stop() {
         this.ticSynth.frameCallback = null;

@@ -4,7 +4,10 @@
         <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
     <body>
-        <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="250" id="master-volume">
+        <div>
+            <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="250" id="master-volume">
+        </div>
+        <canvas id="scope" width="256" height="128"></canvas>
         <ul id="keyboard"></ul>
     </body>
 </html>

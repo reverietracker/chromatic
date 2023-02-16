@@ -9,6 +9,8 @@ export class TICSynth {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
         this.frameCallback = null;
+        this.onFrame = null;
+        this.frameNumber = 0;
 
         this.samplesPerFrame = sampleRate / 60;
         this.samplesToNextFrame = 0;
@@ -22,7 +24,9 @@ export class TICSynth {
         while (samplePtr < audioData.length) {
             if (this.samplesToNextFrame <= 0) {
                 if (this.frameCallback) {
-                    let frameData = this.frameCallback();
+                    let frameData = this.frameCallback(this.frameNumber);
+                    if (this.onFrame) this.onFrame(frameData);
+                    this.frameNumber++;
                     this.waveform = frameData.waveform;
                     this.volume = frameData.volume;
                     this.frequency = Math.floor(frameData.frequency);

@@ -1,9 +1,9 @@
 export class SquareWave {
     getFrameCallback(freq) {
-        return () => {
+        return (frame) => {
             return {
                 frequency: freq,
-                volume: 15,
+                volume: Math.max(0, 15 - frame),
                 waveform: [
                     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
