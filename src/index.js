@@ -1,14 +1,14 @@
 import "./chromatic.css";
 
 import { AudioController } from "./audio";
-import { SquareWave } from "./instruments";
+import { Wave } from "./instruments";
 import { Scope } from "./scope";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
-const waveform = new SquareWave();
+const waveform = new Wave();
 const waveformGenerator = waveform.getFrameCallback(440);
 let currentKey = null;
 

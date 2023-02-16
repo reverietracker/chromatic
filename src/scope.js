@@ -13,7 +13,7 @@ export class Scope {
         this.ctx.fillStyle = "green";
         for (let i = 0; i < 32; i++) {
             const level = (frameData.waveform[i] - 7.5) / 7.5 * frameData.volume / 15;
-            this.ctx.fillRect(i * this.width / 32, (level + 1) / 2 * (this.height - 4), this.width / 32, 4);
+            this.ctx.fillRect(i * this.width / 32, (-level + 1) / 2 * (this.height - 4), this.width / 32, 4);
         }
     }
 }
