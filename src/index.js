@@ -72,21 +72,23 @@ document.addEventListener('DOMContentLoaded', () => {
         scrubValue.innerText = scrubControl.value;
     });
 
-    const waveTypeControl = document.getElementById("wave-type");
-    waveTypeControl.addEventListener('change', () => {
-        instrument.waveType = parseInt(waveTypeControl.value);
-        waveformGenerator = instrument.getFrameCallback(440);
-        drawScopeAtScrubPosition();
-    })
+    const initControl = (inputId, param) => {
+        const elem = document.getElementById(inputId);
+        instrument[param] = parseInt(elem.value);
+        elem.addEventListener('change', () => {
+            instrument[param] = parseInt(elem.value);
+            waveformGenerator = instrument.getFrameCallback(440);
+            drawScopeAtScrubPosition();
+        });
+    }
+    initControl("wave-type", "waveType");
+    initControl("phase", "phase");
+    initControl("decay-to", "decayTo");
+    initControl("decay-speed", "decaySpeed");
 
-    const decayToControl = document.getElementById("decay-to");
-    decayToControl.addEventListener('input', () => {
-        instrument.decayTo = decayToControl.value;
-        waveformGenerator = instrument.getFrameCallback(440);
-        drawScopeAtScrubPosition();
-    })
-
+    waveformGenerator = instrument.getFrameCallback(440);
     drawScopeAtScrubPosition();
+
     audio.on('frame', (frameData) => {
         scope.drawFrame(frameData);
     });
