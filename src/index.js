@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initControl("phase-period", "phasePeriod");
     initControl("decay-to", "decayTo");
     initControl("decay-speed", "decaySpeed");
+    initControl("vibrato-depth", "vibratoDepth");
+    initControl("vibrato-period", "vibratoPeriod");
 
     waveformGenerator = instrument.getFrameCallback(440);
     drawScopeAtScrubPosition();

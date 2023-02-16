@@ -12,6 +12,8 @@ export class Wave {
         this.phaseMin = 16;
         this.phaseMax = 16;
         this.phasePeriod = 16;
+        this.vibratoDepth = 0;
+        this.vibratoPeriod = 16;
     }
     getFrameCallback(frequency) {
         return (frame) => {
@@ -31,7 +33,7 @@ export class Wave {
                     break;
             }
             return {
-                frequency,
+                frequency: frequency + this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod),
                 volume: Math.max(this.decayTo, 15 - (frame * this.decaySpeed / 16)),
                 waveform,
             };

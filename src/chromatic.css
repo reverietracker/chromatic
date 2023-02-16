@@ -11,6 +11,10 @@
     margin-left: 1em;
 }
 
+#parameters fieldset {
+    float: left;
+}
+
 #parameters fieldset[disabled] {
     opacity: 0.5;
 }
