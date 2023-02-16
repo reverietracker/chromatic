@@ -2,6 +2,10 @@
     border: 1px solid black;
 }
 
+#scrub {
+    width: 400px;
+}
+
 #keyboard {
     position: relative;
 }

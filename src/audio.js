@@ -37,6 +37,7 @@ export class AudioController extends EventEmitter {
     }
     stop() {
         this.ticSynth.frameCallback = null;
+        this.emit('stop');
     }
     setVolume(vol) {
         this.volume = vol;

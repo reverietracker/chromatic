@@ -9,6 +9,7 @@ const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
 const waveform = new SquareWave();
+const waveformGenerator = waveform.getFrameCallback(440);
 let currentKey = null;
 
 class Key {
@@ -45,7 +46,7 @@ class Key {
 document.addEventListener('DOMContentLoaded', () => {
     const masterVolumeControl = document.getElementById("master-volume");
     audio.setVolume(masterVolumeControl.value / 1000);
-    masterVolumeControl.addEventListener('change', () => {
+    masterVolumeControl.addEventListener('input', () => {
         audio.setVolume(masterVolumeControl.value / 1000);
     })
 
@@ -61,7 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const scopeCanvas = document.getElementById("scope");
     const scope = new Scope(scopeCanvas);
+    const scrubControl = document.getElementById("scrub");
+    const drawScopeAtScrubPosition = () => {
+        scope.drawFrame(waveformGenerator(scrubControl.value));
+    }
+    scrubControl.addEventListener('input', () => {
+        drawScopeAtScrubPosition();
+    });
+
+    drawScopeAtScrubPosition();
     audio.on('frame', (frameData) => {
         scope.drawFrame(frameData);
+    });
+    audio.on('stop', () => {
+        drawScopeAtScrubPosition();
     })
 });
