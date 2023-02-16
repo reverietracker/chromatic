@@ -18,10 +18,14 @@
                         <option value="3">sine</option>
                     </select>
                 </li>
+                <li>
+                    <label for="decay-to">Decay to volume</label>
+                    <input type="number" min="0" max="15" value="0" id="decay-to">
+                </li>
             </ul>
         </div>
         <div class="section">
-            <label for="scrub">time</label> <input type="range" min="0" max="120" value="0" id="scrub">
+            <label for="scrub">time</label> <input type="range" min="0" max="120" value="0" id="scrub"> <span id="scrub-value"></span>
         </div class="section">
         <ul id="keyboard"></ul>
     </body>

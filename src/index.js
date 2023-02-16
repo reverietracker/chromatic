@@ -63,16 +63,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const scopeCanvas = document.getElementById("scope");
     const scope = new Scope(scopeCanvas);
     const scrubControl = document.getElementById("scrub");
+    const scrubValue = document.getElementById("scrub-value");
     const drawScopeAtScrubPosition = () => {
         scope.drawFrame(waveformGenerator(scrubControl.value));
     }
     scrubControl.addEventListener('input', () => {
         drawScopeAtScrubPosition();
+        scrubValue.innerText = scrubControl.value;
     });
 
     const waveTypeControl = document.getElementById("wave-type");
     waveTypeControl.addEventListener('change', () => {
         instrument.waveType = parseInt(waveTypeControl.value);
+        waveformGenerator = instrument.getFrameCallback(440);
+        drawScopeAtScrubPosition();
+    })
+
+    const decayToControl = document.getElementById("decay-to");
+    decayToControl.addEventListener('input', () => {
+        instrument.decayTo = decayToControl.value;
         waveformGenerator = instrument.getFrameCallback(440);
         drawScopeAtScrubPosition();
     })

@@ -7,6 +7,7 @@ const waveType = {
 export class Wave {
     constructor() {
         this.waveType = waveType.SQUARE;
+        this.decayTo = 0;
     }
     getFrameCallback(frequency) {
         let waveform;
@@ -24,7 +25,7 @@ export class Wave {
         return (frame) => {
             return {
                 frequency,
-                volume: Math.max(0, 15 - frame),
+                volume: Math.max(this.decayTo, 15 - frame),
                 waveform,
             };
         }
