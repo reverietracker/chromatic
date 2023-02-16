@@ -1,5 +1,13 @@
+.section {
+    clear: both;
+}
 #scope {
     border: 1px solid black;
+    float: left;
+}
+
+#parameters {
+    float: left;
 }
 
 #scrub {

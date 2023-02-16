@@ -4,13 +4,25 @@
         <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
     <body>
-        <div>
+        <div class="section">
             <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="250" id="master-volume">
         </div>
-        <canvas id="scope" width="256" height="128"></canvas>
-        <div>
-            <label for="scrub">time</label> <input type="range" min="0" max="120" value="0" id="scrub">
+        <div class="section">
+            <canvas id="scope" width="256" height="128"></canvas>
+            <ul id="parameters">
+                <li>
+                    <label for="wave-type">Wave type</label>
+                    <select id="wave-type">
+                        <option value="1" selected>square</option>
+                        <option value="2">sawtooth</option>
+                        <option value="3">sine</option>
+                    </select>
+                </li>
+            </ul>
         </div>
+        <div class="section">
+            <label for="scrub">time</label> <input type="range" min="0" max="120" value="0" id="scrub">
+        </div class="section">
         <ul id="keyboard"></ul>
     </body>
 </html>

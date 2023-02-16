@@ -8,8 +8,8 @@ const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
-const waveform = new Wave();
-const waveformGenerator = waveform.getFrameCallback(440);
+const instrument = new Wave();
+let waveformGenerator = instrument.getFrameCallback(440);
 let currentKey = null;
 
 class Key {
@@ -34,7 +34,7 @@ class Key {
     play() {
         currentKey = this;
         this.button.classList.add('active');
-        const frameCallback = waveform.getFrameCallback(this.frequency);
+        const frameCallback = instrument.getFrameCallback(this.frequency);
         audio.play(frameCallback);
     }
     release() {
@@ -69,6 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     scrubControl.addEventListener('input', () => {
         drawScopeAtScrubPosition();
     });
+
+    const waveTypeControl = document.getElementById("wave-type");
+    waveTypeControl.addEventListener('change', () => {
+        instrument.waveType = parseInt(waveTypeControl.value);
+        waveformGenerator = instrument.getFrameCallback(440);
+        drawScopeAtScrubPosition();
+    })
 
     drawScopeAtScrubPosition();
     audio.on('frame', (frameData) => {

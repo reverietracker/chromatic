@@ -6,7 +6,7 @@ const waveType = {
 
 export class Wave {
     constructor() {
-        this.waveType = waveType.SINE;
+        this.waveType = waveType.SQUARE;
     }
     getFrameCallback(frequency) {
         let waveform;
