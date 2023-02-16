@@ -8,6 +8,11 @@
 
 #parameters {
     float: left;
+    margin-left: 1em;
+}
+
+#parameters fieldset[disabled] {
+    opacity: 0.5;
 }
 
 #scrub {

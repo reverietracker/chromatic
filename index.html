@@ -9,28 +9,42 @@
         </div>
         <div class="section">
             <canvas id="scope" width="256" height="128"></canvas>
-            <ul id="parameters">
-                <li>
+            <div id="parameters">
+                <div>
                     <label for="wave-type">Wave type</label>
                     <select id="wave-type">
                         <option value="1" selected>square</option>
                         <option value="2">triangle</option>
                         <option value="3">sine</option>
                     </select>
-                </li>
-                <li>
-                    <label for="phase">Phase</label>
-                    <input type="number" min="0" max="32" value="16" id="phase">
-                </li>
-                <li>
-                    <label for="decay-speed">Decay speed</label>
-                    <input type="number" min="0" max="256" value="16" id="decay-speed">
-                </li>
-                <li>
-                    <label for="decay-to">Decay to volume</label>
-                    <input type="number" min="0" max="15" value="0" id="decay-to">
-                </li>
-            </ul>
+                </div>
+                <fieldset id="fieldset-phase">
+                    <legend>Phase</legend>
+                    <div>
+                        <label for="phase-min">Min</label>
+                        <input type="number" min="0" max="32" value="16" id="phase-min">
+                    </div>
+                    <div>
+                        <label for="phase-max">Max</label>
+                        <input type="number" min="0" max="32" value="16" id="phase-max">
+                    </div>
+                    <div>
+                        <label for="phase-period">Period</label>
+                        <input type="number" min="0" max="256" value="64" id="phase-period">
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Envelope</legend>
+                    <div>
+                        <label for="decay-speed">Decay speed</label>
+                        <input type="number" min="0" max="256" value="16" id="decay-speed">
+                    </div>
+                    <div>
+                        <label for="decay-to">Decay to volume</label>
+                        <input type="number" min="0" max="15" value="0" id="decay-to">
+                    </div>
+                </fieldset>
+            </div>
         </div>
         <div class="section">
             <label for="scrub">time</label> <input type="range" min="0" max="60" value="0" id="scrub"> <span id="scrub-value"></span>

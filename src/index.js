@@ -1,7 +1,7 @@
 import "./chromatic.css";
 
 import { AudioController } from "./audio";
-import { Wave } from "./instruments";
+import { Wave, waveType } from "./instruments";
 import { Scope } from "./scope";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -72,17 +72,27 @@ document.addEventListener('DOMContentLoaded', () => {
         scrubValue.innerText = scrubControl.value;
     });
 
-    const initControl = (inputId, param) => {
+    const phaseFieldset = document.getElementById("fieldset-phase");
+    const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
         instrument[param] = parseInt(elem.value);
-        elem.addEventListener('change', () => {
+        elem.addEventListener('input', () => {
             instrument[param] = parseInt(elem.value);
             waveformGenerator = instrument.getFrameCallback(440);
             drawScopeAtScrubPosition();
+            if (onchange) onchange(elem.value);
         });
     }
-    initControl("wave-type", "waveType");
-    initControl("phase", "phase");
+    initControl("wave-type", "waveType", (val) => {
+        if (val == waveType.SINE) {
+            phaseFieldset.setAttribute('disabled', 'true');
+        } else {
+            phaseFieldset.removeAttribute('disabled');
+        }
+    });
+    initControl("phase-min", "phaseMin");
+    initControl("phase-max", "phaseMax");
+    initControl("phase-period", "phasePeriod");
     initControl("decay-to", "decayTo");
     initControl("decay-speed", "decaySpeed");
 
