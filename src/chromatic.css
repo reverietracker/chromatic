@@ -18,6 +18,16 @@
 #parameters fieldset[disabled] {
     opacity: 0.5;
 }
+#harmonics {
+    margin: 0;
+    padding: 0;
+}
+#harmonics li {
+    display: inline;
+}
+#harmonics input {
+    width: 3em;
+}
 
 #scrub {
     width: 400px;

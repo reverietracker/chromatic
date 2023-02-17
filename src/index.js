@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const phaseFieldset = document.getElementById("fieldset-phase");
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
-        instrument[param] = parseInt(elem.value);
+        elem.value = instrument[param];
         elem.addEventListener('input', () => {
             instrument[param] = parseInt(elem.value);
             waveformGenerator = instrument.getFrameCallback(440);
@@ -98,6 +98,27 @@ document.addEventListener('DOMContentLoaded', () => {
     initControl("decay-speed", "decaySpeed");
     initControl("vibrato-depth", "vibratoDepth");
     initControl("vibrato-period", "vibratoPeriod");
+
+    const harmonicsUl = document.getElementById('harmonics');
+    const initHarmonicControl = (i) => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = 0;
+        input.max = 1;
+        input.step = 0.1;
+        input.value = instrument.harmonics[i];
+        const li = document.createElement('li');
+        harmonicsUl.appendChild(li);
+        li.appendChild(input);
+        input.addEventListener('input', () => {
+            instrument.harmonics[i] = input.value;
+            waveformGenerator = instrument.getFrameCallback(440);
+            drawScopeAtScrubPosition();
+        })
+    }
+    for (var i = 0; i < 8; i++) {
+        initHarmonicControl(i);
+    }
 
     waveformGenerator = instrument.getFrameCallback(440);
     drawScopeAtScrubPosition();
