@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const phaseFieldset = document.getElementById("fieldset-phase");
+    const harmonicsFieldset = document.getElementById("fieldset-harmonics");
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
         elem.value = instrument[param];
@@ -84,10 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     initControl("wave-type", "waveType", (val) => {
-        if (val == waveType.SINE) {
+        if (val == waveType.NOISE) {
             phaseFieldset.setAttribute('disabled', 'true');
+            harmonicsFieldset.setAttribute('disabled', 'true');
+        } else if (val == waveType.SINE) {
+            phaseFieldset.setAttribute('disabled', 'true');
+            harmonicsFieldset.removeAttribute('disabled');
         } else {
             phaseFieldset.removeAttribute('disabled');
+            harmonicsFieldset.removeAttribute('disabled');
         }
     });
     initControl("transpose", "transpose");

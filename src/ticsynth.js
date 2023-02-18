@@ -8,6 +8,7 @@ export class TICSynth {
             15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
+        this.waveformIsNoise = false;
         this.frameCallback = null;
         this.onFrame = null;
         this.frameNumber = 0;
@@ -17,10 +18,10 @@ export class TICSynth {
         this.samplesToNextWaveformElement = 0;
         this.samplesPerWaveformElement = 0;
         this.waveformPtr = 0;
+        this.level = 0;
     }
     generate(audioData) {
         let samplePtr = 0;
-        let level = this.waveform[this.waveformPtr];
         while (samplePtr < audioData.length) {
             if (this.samplesToNextFrame <= 0) {
                 if (this.frameCallback) {
@@ -28,6 +29,14 @@ export class TICSynth {
                     if (this.onFrame) this.onFrame(frameData);
                     this.frameNumber++;
                     this.waveform = frameData.waveform;
+                    let waveformIsNoise = true;
+                    for (let i = 0; i < 32; i++) {
+                        if (this.waveform[i] != 0) {
+                            waveformIsNoise = false;
+                            break;
+                        }
+                    }
+                    this.waveformIsNoise = waveformIsNoise;
                     this.volume = frameData.volume;
                     this.frequency = Math.floor(frameData.frequency);
                 } else {
@@ -37,11 +46,15 @@ export class TICSynth {
                 this.samplesToNextFrame += this.samplesPerFrame;
             }
             if (this.samplesToNextWaveformElement <= 0) {
-                level = this.waveform[this.waveformPtr];
+                if (this.waveformIsNoise) {
+                    this.level = Math.random() >= 0.5 ? 15 : 0;
+                } else {
+                    this.level = this.waveform[this.waveformPtr];
+                }
                 this.waveformPtr = (this.waveformPtr + 1) % 32;
                 this.samplesToNextWaveformElement += this.samplesPerWaveformElement;
             }
-            let finalLevel = (level - 7.5) / 7.5 * this.volume / 15;
+            let finalLevel = (this.level - 7.5) / 7.5 * this.volume / 15;
             audioData[samplePtr++] = finalLevel;
             this.samplesToNextWaveformElement--;
             this.samplesToNextFrame--;
