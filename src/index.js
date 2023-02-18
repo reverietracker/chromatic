@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     initControl("transpose", "transpose");
+    initControl("slide-step", "slideStep");
     initControl("phase-min", "phaseMin");
     initControl("phase-max", "phaseMax");
     initControl("phase-period", "phasePeriod");

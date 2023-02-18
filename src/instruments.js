@@ -9,6 +9,7 @@ export class Wave {
     constructor() {
         this.waveType = waveType.SQUARE;
         this.transpose = 0;
+        this.slideStep = 0;
         this.decayTo = 0;
         this.decaySpeed = 16;
         this.phaseMin = 16;
@@ -53,8 +54,14 @@ export class Wave {
                 }
             }
 
+            const finalFrequency = (
+                frequency
+                + this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)
+                + frame * this.slideStep / 16
+            );
+
             return {
-                frequency: Math.min(Math.max(1, frequency + this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)), 4095),
+                frequency: Math.min(Math.max(1, Math.round(finalFrequency)), 4095),
                 volume: Math.max(this.decayTo, 15 - (frame * this.decaySpeed / 16)),
                 waveform,
             };
