@@ -71,10 +71,10 @@ export class Wave {
         const modifierStatements = [];
         const waveStatements = [];
 
-        let waveExpr;
         let usePhase = false;
 
         let clampFrequency = false;
+        let clampWaveform = false;
 
         if (this.transpose != 0) {
             modifierStatements.push(`  f=f*${2**(this.transpose/12)}`);
@@ -92,7 +92,7 @@ export class Wave {
         }
 
         if (clampFrequency) {
-            modifierStatements.push(`  f=math.min(math.max(1,f//1),4095)`);
+            modifierStatements.push(`  f=math.min(math.max(1,(f+0.5)//1),4095)`);
         }
 
         if (this.decaySpeed > 0) {
@@ -102,17 +102,64 @@ export class Wave {
         if (this.waveType == waveType.NOISE) {
             waveStatements.push("    poke4(a*2+4+i,0)");
         } else {
+            const waveTerms = [];
+
             switch (this.waveType) {
                 case waveType.SQUARE:
-                    waveExpr = "i<p and 7.5 or -7.5"
                     usePhase = true;
+                    for (let h = 0; h < 8; h++) {
+                        if (this.harmonics[h] == 0) continue;
+                        let indexExpr;
+                        if (h == 0) {
+                            indexExpr = "i";
+                        } else {
+                            indexExpr = `(i*${h+1}%32)`;
+                        }
+                        const waveTerm = `${indexExpr}<p and 7.5 or -7.5`;
+                        if (this.harmonics[h] == 1) {
+                            waveTerms.push(waveTerm);
+                        } else {
+                            waveTerms.push(`${this.harmonics[h]}*(${waveTerm})`);
+                            clampWaveform = true;
+                        }
+                    }
                     break;
                 case waveType.TRIANGLE:
-                    waveExpr = "15*(i<p and i/p or (32-i)/(32-p))-7.5";
                     usePhase = true;
+                    for (let h = 0; h < 8; h++) {
+                        if (this.harmonics[h] == 0) continue;
+                        let indexExpr;
+                        if (h == 0) {
+                            indexExpr = "i";
+                        } else {
+                            indexExpr = `(i*${h+1}%32)`;
+                        }
+                        const waveTerm = `15*(${indexExpr}<p and ${indexExpr}/p or (32-${indexExpr})/(32-p))-7.5`
+                        if (this.harmonics[h] == 1) {
+                            waveTerms.push(waveTerm);
+                        } else {
+                            waveTerms.push(`${this.harmonics[h]}*(${waveTerm})`);
+                            clampWaveform = true;
+                        }
+                    }
                     break;
                 case waveType.SINE:
-                    waveExpr = "7.5*math.sin(math.pi*i/16)";
+                    for (let h = 0; h < 8; h++) {
+                        if (this.harmonics[h] == 0) continue;
+                        let indexExpr;
+                        if (h == 0) {
+                            indexExpr = "i";
+                        } else {
+                            indexExpr = `(i*${h+1}%32)`;
+                        }
+                        const waveTerm = `7.5*math.sin(math.pi*${indexExpr}/16)`;
+                        if (this.harmonics[h] == 1) {
+                            waveTerms.push(waveTerm);
+                        } else {
+                            waveTerms.push(`${this.harmonics[h]}*(${waveTerm})`);
+                            if (this.harmonics[h] > 1) clampWaveform = true;
+                        }
+                    }
                     break;
                 default:
                     throw new Exception("Unknown wave type");
@@ -128,8 +175,19 @@ export class Wave {
                 }
             }
 
-            waveStatements.push(`    local r=${waveExpr}`);
-            waveStatements.push(`    poke4(a*2+4+i,7.5+r)`);
+            if (waveTerms.length == 1) {
+                if (clampWaveform) {
+                    waveStatements.push(`    poke4(a*2+4+i,math.min(15,math.max(0,7.5+(${waveTerms[0]}))))`);
+                } else {
+                    waveStatements.push(`    poke4(a*2+4+i,7.5+(${waveTerms[0]}))`);
+                }
+            } else {
+                waveStatements.push(`    local r=0`);
+                for (let i = 0; i < waveTerms.length; i++) {
+                    waveStatements.push(`    r=r+${waveTerms[i]}`);
+                }
+                waveStatements.push(`    poke4(a*2+4+i,math.min(15,math.max(0,7.5+r)))`);
+            }
         }
 
 return `function (c,v,f,t)
