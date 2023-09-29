@@ -73,6 +73,11 @@ export class Wave {
         let waveStmt;
         let waveExpr;
         let usePhase = false;
+
+        let clampFrequency = false;
+        let clampStmt = '';
+        let vibratoStmt = '';
+
         if (this.waveType == waveType.NOISE) {
             waveStmt = "poke4(a*2+4+i,0)"
         } else {
@@ -110,9 +115,21 @@ export class Wave {
             volumeStmt = `v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`;
         }
 
+        if (this.vibratoDepth > 0) {
+            // this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)
+            vibratoStmt = `f=f+${this.vibratoDepth}*math.sin(t*2*math.pi/${this.vibratoPeriod})`;
+            clampFrequency = true;
+        }
+
+        if (clampFrequency) {
+            clampStmt = `f=math.min(math.max(1,f//1),4095)`;
+        }
+
 
 return `function (c,v,f,t)
     local a=0xff9c+c*18
+    ${vibratoStmt}
+    ${clampStmt}
     ${volumeStmt}
     poke(a,f&255)
     poke(a+1,(v<<4)+(f>>8))
