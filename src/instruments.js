@@ -86,6 +86,11 @@ export class Wave {
             clampFrequency = true;
         }
 
+        if (this.slideStep != 0) {
+            modifierStatements.push(`  f=f+t*${this.slideStep/16}`);
+            clampFrequency = true;
+        }
+
         if (clampFrequency) {
             modifierStatements.push(`  f=math.min(math.max(1,f//1),4095)`);
         }
