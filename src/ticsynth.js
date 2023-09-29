@@ -43,6 +43,11 @@ export class TICSynth {
                     this.volume = 0;
                 }
                 this.samplesPerWaveformElement = this.sampleRate / this.frequency / 32;
+                if (this.waveformIsNoise) {
+                    // fudge factor to match observed behaviour of TIC-80 -
+                    // apparently noise values are only picked half as often
+                    this.samplesPerWaveformElement *= 2;
+                }
                 this.samplesToNextFrame += this.samplesPerFrame;
             }
             if (this.samplesToNextWaveformElement <= 0) {
