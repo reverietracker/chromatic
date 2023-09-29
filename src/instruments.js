@@ -40,9 +40,8 @@ export class Wave {
                     case waveType.SINE:
                         waveFunc = i => 7.5 * Math.sin(Math.PI * i / 16);
                         break;
-                    default:  // NOISE
-                        waveFunc = i => 0;
-                        break;
+                    default:
+                        throw new Exception("Unknown wave type");
                 }
                 for (let i = 0; i < 32; i++) {
                     let tot = 0;
@@ -66,5 +65,56 @@ export class Wave {
                 waveform,
             };
         }
+    }
+
+    getLuaCode() {
+        let phaseStmt = '';
+        let waveStmt;
+        let waveExpr;
+        let usePhase = false;
+        if (this.waveType == waveType.NOISE) {
+            waveStmt = "poke4(a*2+4+i,0)"
+        } else {
+            switch (this.waveType) {
+                case waveType.SQUARE:
+                    waveExpr = "i<p and 7.5 or -7.5"
+                    usePhase = true;
+                    break;
+                case waveType.TRIANGLE:
+                    waveExpr = "15*(i<p and i/p or (32-i)/(32-p))-7.5";
+                    usePhase = true;
+                    break;
+                case waveType.SINE:
+                    waveExpr = "7.5*math.sin(math.pi*i/16)";
+                    break;
+                default:
+                    throw new Exception("Unknown wave type");
+            }
+
+            if (usePhase) {
+                const phaseCentre = (this.phaseMin + this.phaseMax) / 2;
+                const phaseAmplitude = (this.phaseMax - this.phaseMin) / 2;
+                if (phaseAmplitude > 0) {
+                    phaseStmt = `local p=${phaseCentre}-${phaseAmplitude}*math.cos(t*2*math.pi/${this.phasePeriod})`;
+                } else {
+                    phaseStmt = `local p=${phaseCentre}`;
+                }
+            }
+
+            waveStmt = `local r=${waveExpr}
+        poke4(a*2+4+i,7.5+r)`
+        }
+
+
+return `function (c,v,f,t)
+    local a=0xff9c+c*18
+    poke(a,f&255)
+    poke(a+1,(v<<4)+(f>>8))
+    ${phaseStmt}
+    for i=0,31 do
+        ${waveStmt}
+    end
+end
+`;
     }
 }

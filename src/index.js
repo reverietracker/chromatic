@@ -127,6 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
         initHarmonicControl(i);
     }
 
+    const generateCodeButton = document.getElementById("generate-code");
+    const codeOutput = document.getElementById("code-output");
+    generateCodeButton.addEventListener('click', () => {
+        const code = instrument.getLuaCode();
+        codeOutput.value = code;
+    });
+
     waveformGenerator = instrument.getFrameCallback(440);
     drawScopeAtScrubPosition();
 

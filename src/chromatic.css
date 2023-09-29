@@ -35,6 +35,7 @@
 
 #keyboard {
     position: relative;
+    height: 100px;
 }
 .key {
     position: absolute;
