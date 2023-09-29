@@ -69,6 +69,7 @@ export class Wave {
 
     getLuaCode() {
         let phaseStmt = '';
+        let volumeStmt = '';
         let waveStmt;
         let waveExpr;
         let usePhase = false;
@@ -105,9 +106,14 @@ export class Wave {
         poke4(a*2+4+i,7.5+r)`
         }
 
+        if (this.decaySpeed > 0) {
+            volumeStmt = `v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`;
+        }
+
 
 return `function (c,v,f,t)
     local a=0xff9c+c*18
+    ${volumeStmt}
     poke(a,f&255)
     poke(a+1,(v<<4)+(f>>8))
     ${phaseStmt}
