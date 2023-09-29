@@ -68,19 +68,34 @@ export class Wave {
     }
 
     getLuaCode() {
-        let phaseStmt = '';
-        let volumeStmt = '';
-        let waveStmt;
+        const modifierStatements = [];
+        const waveStatements = [];
+
         let waveExpr;
         let usePhase = false;
 
         let clampFrequency = false;
-        let clampStmt = '';
-        let vibratoStmt = '';
-        let transposeStmt = '';
+
+        if (this.transpose != 0) {
+            modifierStatements.push(`  f=f*${2**(this.transpose/12)}`);
+            clampFrequency = true;
+        }
+
+        if (this.vibratoDepth > 0) {
+            modifierStatements.push(`  f=f+${this.vibratoDepth}*math.sin(t*2*math.pi/${this.vibratoPeriod})`);
+            clampFrequency = true;
+        }
+
+        if (clampFrequency) {
+            modifierStatements.push(`  f=math.min(math.max(1,f//1),4095)`);
+        }
+
+        if (this.decaySpeed > 0) {
+            modifierStatements.push(`  v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`);
+        }
 
         if (this.waveType == waveType.NOISE) {
-            waveStmt = "poke4(a*2+4+i,0)"
+            waveStatements.push("    poke4(a*2+4+i,0)");
         } else {
             switch (this.waveType) {
                 case waveType.SQUARE:
@@ -102,48 +117,24 @@ export class Wave {
                 const phaseCentre = (this.phaseMin + this.phaseMax) / 2;
                 const phaseAmplitude = (this.phaseMax - this.phaseMin) / 2;
                 if (phaseAmplitude > 0) {
-                    phaseStmt = `local p=${phaseCentre}-${phaseAmplitude}*math.cos(t*2*math.pi/${this.phasePeriod})`;
+                    modifierStatements.push(`  local p=${phaseCentre}-${phaseAmplitude}*math.cos(t*2*math.pi/${this.phasePeriod})`);
                 } else {
-                    phaseStmt = `local p=${phaseCentre}`;
+                    modifierStatements.push(`  local p=${phaseCentre}`);
                 }
             }
 
-            waveStmt = `local r=${waveExpr}
-        poke4(a*2+4+i,7.5+r)`
+            waveStatements.push(`    local r=${waveExpr}`);
+            waveStatements.push(`    poke4(a*2+4+i,7.5+r)`);
         }
-
-        if (this.decaySpeed > 0) {
-            volumeStmt = `v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`;
-        }
-
-        if (this.transpose != 0) {
-            transposeStmt = `f=f*${2**(this.transpose/12)}`;
-            clampFrequency = true;
-        }
-
-        if (this.vibratoDepth > 0) {
-            // this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)
-            vibratoStmt = `f=f+${this.vibratoDepth}*math.sin(t*2*math.pi/${this.vibratoPeriod})`;
-            clampFrequency = true;
-        }
-
-        if (clampFrequency) {
-            clampStmt = `f=math.min(math.max(1,f//1),4095)`;
-        }
-
 
 return `function (c,v,f,t)
-    local a=0xff9c+c*18
-    ${transposeStmt}
-    ${vibratoStmt}
-    ${clampStmt}
-    ${volumeStmt}
-    poke(a,f&255)
-    poke(a+1,(v<<4)+(f>>8))
-    ${phaseStmt}
-    for i=0,31 do
-        ${waveStmt}
-    end
+  local a=0xff9c+c*18
+${modifierStatements.join('\n')}
+  poke(a,f&255)
+  poke(a+1,(v<<4)+(f>>8))
+  for i=0,31 do
+${waveStatements.join('\n')}
+  end
 end
 `;
     }
