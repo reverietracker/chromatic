@@ -77,6 +77,7 @@ export class Wave {
         let clampFrequency = false;
         let clampStmt = '';
         let vibratoStmt = '';
+        let transposeStmt = '';
 
         if (this.waveType == waveType.NOISE) {
             waveStmt = "poke4(a*2+4+i,0)"
@@ -115,6 +116,11 @@ export class Wave {
             volumeStmt = `v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`;
         }
 
+        if (this.transpose != 0) {
+            transposeStmt = `f=f*${2**(this.transpose/12)}`;
+            clampFrequency = true;
+        }
+
         if (this.vibratoDepth > 0) {
             // this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)
             vibratoStmt = `f=f+${this.vibratoDepth}*math.sin(t*2*math.pi/${this.vibratoPeriod})`;
@@ -128,6 +134,7 @@ export class Wave {
 
 return `function (c,v,f,t)
     local a=0xff9c+c*18
+    ${transposeStmt}
     ${vibratoStmt}
     ${clampStmt}
     ${volumeStmt}
