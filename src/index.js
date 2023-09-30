@@ -8,7 +8,15 @@ const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
-const instrument = new Wave();
+const instruments = [];
+for (let i = 0; i < 16; i++) {
+    instruments.push(new Wave());
+}
+const instrumentSelectorOptions = [];
+
+let instrument = instruments[0];
+let instrumentIndex = 0;
+
 let waveformGenerator = instrument.getFrameCallback(440);
 let currentKey = null;
 
@@ -50,6 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.setVolume(masterVolumeControl.value / 1000);
     })
 
+    const instrumentSelector = document.getElementById("instrument");
+    for (let i = 0; i < instruments.length; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.innerText = `${i+1} - ${instruments[i].name}`;
+        instrumentSelector.appendChild(option);
+        instrumentSelectorOptions[i] = option;
+    }
+
     const keyboard = document.getElementById("keyboard");
     for (let oct=1; oct<4; oct++) {
         for (let n=0; n<12; n++) {
@@ -74,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const phaseFieldset = document.getElementById("fieldset-phase");
     const harmonicsFieldset = document.getElementById("fieldset-harmonics");
+    const controls = [];
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
         elem.value = instrument[param];
@@ -83,18 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
             drawScopeAtScrubPosition();
             if (onchange) onchange(elem.value);
         });
+        controls.push({
+            element: elem,
+            param: param,
+        });
     }
-    initControl("wave-type", "waveType", (val) => {
-        if (val == waveType.NOISE) {
+    const updateControlStateForWaveType = (wt) => {
+        if (wt == waveType.NOISE) {
             phaseFieldset.setAttribute('disabled', 'true');
             harmonicsFieldset.setAttribute('disabled', 'true');
-        } else if (val == waveType.SINE) {
+        } else if (wt == waveType.SINE) {
             phaseFieldset.setAttribute('disabled', 'true');
             harmonicsFieldset.removeAttribute('disabled');
         } else {
             phaseFieldset.removeAttribute('disabled');
             harmonicsFieldset.removeAttribute('disabled');
         }
+    };
+
+    initControl("wave-type", "waveType", (val) => {
+        updateControlStateForWaveType(val);
     });
     initControl("transpose", "transpose");
     initControl("slide-step", "slideStep");
@@ -110,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     nameInput.value = instrument.name;
     nameInput.addEventListener('input', () => {
         instrument.name = nameInput.value;
+        instrumentSelectorOptions[instrumentIndex].innerText = `${instrumentIndex+1} - ${instrument.name}`;
     });
 
     const harmonicsUl = document.getElementById('harmonics');
@@ -138,6 +165,22 @@ document.addEventListener('DOMContentLoaded', () => {
     generateCodeButton.addEventListener('click', () => {
         const code = instrument.getLuaCode();
         codeOutput.value = code;
+    });
+
+    instrumentSelector.addEventListener('change', () => {
+        instrumentIndex = parseInt(instrumentSelector.value);
+        instrument = instruments[instrumentIndex];
+        nameInput.value = instrument.name;
+        for (let i = 0; i < controls.length; i++) {
+            controls[i].element.value = instrument[controls[i].param];
+        }
+        for (let i = 0; i < 8; i++) {
+            harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
+        }
+        updateControlStateForWaveType(instrument.waveType);
+
+        waveformGenerator = instrument.getFrameCallback(440);
+        drawScopeAtScrubPosition();
     });
 
     waveformGenerator = instrument.getFrameCallback(440);
