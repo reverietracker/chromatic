@@ -163,7 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateCodeButton = document.getElementById("generate-code");
     const codeOutput = document.getElementById("code-output");
     generateCodeButton.addEventListener('click', () => {
-        const code = instrument.getLuaCode();
+        const code = "{\n" + instruments.map((instrument) => {
+            return `${instrument.getLuaCode()},`;
+        }).join("\n") + "\n}";
         codeOutput.value = code;
     });
 
