@@ -8,6 +8,7 @@ export const waveType = {
 export class Wave {
     constructor() {
         this.waveType = waveType.SQUARE;
+        this.name = "";
         this.transpose = 0;
         this.slideStep = 0;
         this.decayTo = 0;
@@ -191,6 +192,7 @@ export class Wave {
         }
 
 return `function (c,v,f,t)
+  -- ${this.name}
   local a=0xff9c+c*18
 ${modifierStatements.join('\n')}
   poke(a,f&255)

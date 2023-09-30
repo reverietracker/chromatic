@@ -1,9 +1,13 @@
 .section {
     clear: both;
 }
-#scope {
-    border: 1px solid black;
+.left-col {
     float: left;
+}
+#scope {
+    display: block;
+    border: 1px solid black;
+    margin: 10px 0;
 }
 
 #parameters {

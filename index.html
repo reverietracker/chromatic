@@ -8,7 +8,11 @@
             <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="250" id="master-volume">
         </div>
         <div class="section">
-            <canvas id="scope" width="256" height="128"></canvas>
+            <div class="left-col">
+                <label for="name">Instrument name</label>
+                <input id="name">
+                <canvas id="scope" width="256" height="128"></canvas>
+            </div>
             <div id="parameters">
                 <div>
                     <label for="wave-type">Wave type</label>

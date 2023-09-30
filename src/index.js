@@ -106,6 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initControl("vibrato-depth", "vibratoDepth");
     initControl("vibrato-period", "vibratoPeriod");
 
+    const nameInput = document.getElementById("name");
+    nameInput.value = instrument.name;
+    nameInput.addEventListener('input', () => {
+        instrument.name = nameInput.value;
+    });
+
     const harmonicsUl = document.getElementById('harmonics');
     const initHarmonicControl = (i) => {
         const input = document.createElement('input');
