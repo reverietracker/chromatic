@@ -1,3 +1,5 @@
+import { Model, fields } from 'catwalk';
+
 export const waveType = {
     SQUARE: 1,
     TRIANGLE: 2,
@@ -5,21 +7,24 @@ export const waveType = {
     NOISE: 4,
 }
 
-export class Wave {
-    constructor() {
-        this.waveType = waveType.SQUARE;
-        this.name = "";
-        this.transpose = 0;
-        this.slideStep = 0;
-        this.decayTo = 0;
-        this.decaySpeed = 16;
-        this.phaseMin = 16;
-        this.phaseMax = 16;
-        this.phasePeriod = 16;
-        this.vibratoDepth = 0;
-        this.vibratoPeriod = 16;
-        this.harmonics = [1, 0, 0, 0, 0, 0, 0, 0];
-    }
+export class Wave extends Model([
+    new fields.IntegerField('waveType', {default: waveType.SQUARE}),
+    new fields.ValueField('name', {default: ""}),
+    new fields.IntegerField('transpose', {default: 0, min: -24, max: 24}),
+    new fields.IntegerField('slideStep', {default: 0, min: -256, max: 256}),
+    new fields.IntegerField('decayTo', {default: 0, min: 0, max: 15}),
+    new fields.IntegerField('decaySpeed', {default: 16, min: 0, max: 256}),
+    new fields.IntegerField('phaseMin', {default: 16, min: 0, max: 32}),
+    new fields.IntegerField('phaseMax', {default: 16, min: 0, max: 32}),
+    new fields.IntegerField('phasePeriod', {default: 16, min: 0, max: 256}),
+    new fields.IntegerField('vibratoDepth', {default: 0, min: 0, max: 256}),
+    new fields.IntegerField('vibratoPeriod', {default: 16, min: 0, max: 256}),
+    new fields.ListField(
+        'harmonics',
+        new fields.IntegerField('harmonic', {default: 0, min: 0, max: 1}),
+        {length: 8, default: [1, 0, 0, 0, 0, 0, 0, 0]},
+    ),
+]) {
     getFrameCallback(originalFrequency) {
         const frequency = originalFrequency * 2**(this.transpose / 12);
         return (frame) => {
