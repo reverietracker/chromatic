@@ -3,18 +3,16 @@ import "./chromatic.css";
 import { AudioController } from "./audio";
 import { Wave, waveType } from "./instruments";
 import { Scope } from "./scope";
+import { Song } from "./song";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
-const instruments = [];
-for (let i = 0; i < 16; i++) {
-    instruments.push(new Wave());
-}
+const song = new Song();
 const instrumentSelectorOptions = [];
 
-let instrument = instruments[0];
+let instrument = song.instruments[0];
 let instrumentIndex = 0;
 
 let waveformGenerator = instrument.getFrameCallback(440);
@@ -59,10 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     const instrumentSelector = document.getElementById("instrument");
-    for (let i = 0; i < instruments.length; i++) {
+    for (let i = 0; i < song.instruments.length; i++) {
         const option = document.createElement('option');
         option.value = i;
-        option.innerText = `${i+1} - ${instruments[i].name}`;
+        option.innerText = `${i+1} - ${song.instruments[i].name}`;
         instrumentSelector.appendChild(option);
         instrumentSelectorOptions[i] = option;
     }
@@ -163,15 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateCodeButton = document.getElementById("generate-code");
     const codeOutput = document.getElementById("code-output");
     generateCodeButton.addEventListener('click', () => {
-        const code = "{\n" + instruments.map((instrument) => {
-            return `${instrument.getLuaCode()},`;
-        }).join("\n") + "\n}";
-        codeOutput.value = code;
+        codeOutput.value = song.getLuaCode();
     });
 
     instrumentSelector.addEventListener('change', () => {
         instrumentIndex = parseInt(instrumentSelector.value);
-        instrument = instruments[instrumentIndex];
+        instrument = song.instruments[instrumentIndex];
         nameInput.value = instrument.name;
         for (let i = 0; i < controls.length; i++) {
             controls[i].element.value = instrument[controls[i].param];
