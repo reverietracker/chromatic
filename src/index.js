@@ -1,3 +1,5 @@
+import { Container, NumberInput, TextInput } from 'catwalk-ui';
+
 import "./chromatic.css";
 
 import { AudioController } from "./audio";
@@ -10,7 +12,6 @@ const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
 const song = new Song();
-const instrumentSelectorOptions = [];
 
 let instrument = song.instruments[0];
 let instrumentIndex = 0;
@@ -18,85 +19,104 @@ let instrumentIndex = 0;
 let waveformGenerator = instrument.getFrameCallback(440);
 let currentKey = null;
 
-const instrumentEditor = (
-    <div class="instrument-editor">
-        <div class="section">
-            <div class="left-col">
-                <label for="name">Instrument name</label>
-                <input id="name" />
-                <canvas id="scope" width="256" height="128"></canvas>
-            </div>
-            <div id="parameters">
-                <div>
-                    <label for="wave-type">Wave type</label>
-                    <select id="wave-type">
-                        <option value="1" selected>square</option>
-                        <option value="2">triangle</option>
-                        <option value="3">sine</option>
-                        <option value="4">noise</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="transpose">Transpose</label>
-                    <input type="number" min="-24" max="24" value="0" id="transpose" />
-                </div>
-                <div>
-                    <label for="slide-step">Pitch slide step</label>
-                    <input type="number" min="-256" max="256" value="0" id="slide-step" />
-                </div>
-                <fieldset id="fieldset-phase">
-                    <legend>Phase</legend>
-                    <div>
-                        <label for="phase-min">Min</label>
-                        <input type="number" min="0" max="32" value="16" id="phase-min" />
-                    </div>
-                    <div>
-                        <label for="phase-max">Max</label>
-                        <input type="number" min="0" max="32" value="16" id="phase-max" />
-                    </div>
-                    <div>
-                        <label for="phase-period">Period</label>
-                        <input type="number" min="0" max="256" value="64" id="phase-period" />
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Envelope</legend>
-                    <div>
-                        <label for="decay-speed">Decay speed</label>
-                        <input type="number" min="0" max="256" value="16" id="decay-speed" />
-                    </div>
-                    <div>
-                        <label for="decay-to">Decay to volume</label>
-                        <input type="number" min="0" max="15" value="0" id="decay-to" />
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Vibrato</legend>
-                    <div>
-                        <label for="vibrato-depth">Depth</label>
-                        <input type="number" min="0" max="256" value="0" id="vibrato-depth" />
-                    </div>
-                    <div>
-                        <label for="vibrato-period">Period</label>
-                        <input type="number" min="0" max="256" value="16" id="vibrato-period" />
-                    </div>
-                </fieldset>
-                <div class="section">
-                    <fieldset id="fieldset-harmonics">
-                        <legend>Harmonics</legend>
-                        <ul id="harmonics"></ul>
-                    </fieldset>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <label for="scrub">time</label> <input type="range" min="0" max="60" value="0" id="scrub" /> <span id="scrub-value"></span>
-        </div>
-        <ul id="keyboard"></ul>
-    </div>
-)
+class InstrumentEditor extends Container {
+    static components = {
+        nameInput: TextInput.forField(Wave.fields.name, {label: "Instrument name"}),
+        transposeInput: NumberInput.forField(Wave.fields.transpose),
+        slideStepInput: NumberInput.forField(Wave.fields.slideStep),
+        phaseMinInput: NumberInput.forField(Wave.fields.phaseMin, {label: "Min"}),
+        phaseMaxInput: NumberInput.forField(Wave.fields.phaseMax, {label: "Max"}),
+        phasePeriodInput: NumberInput.forField(Wave.fields.phasePeriod, {label: "Period"}),
+        decaySpeedInput: NumberInput.forField(Wave.fields.decaySpeed),
+        decayToInput: NumberInput.forField(Wave.fields.decayTo),
+        vibratoDepthInput: NumberInput.forField(Wave.fields.vibratoDepth, {label: "Depth"}),
+        vibratoPeriodInput: NumberInput.forField(Wave.fields.vibratoPeriod, {label: "Period"}),
+    }
 
-document.querySelector(".editor").appendChild(instrumentEditor);
+    createNode() {
+        return (
+            <div class="instrument-editor">
+                <div class="section">
+                    <div class="left-col">
+                        {this.nameInput.labelNode}
+                        {this.nameInput}
+                        <canvas id="scope" width="256" height="128"></canvas>
+                    </div>
+                    <div id="parameters">
+                        <div>
+                            <label for="wave-type">Wave type</label>
+                            <select id="wave-type">
+                                <option value="1" selected>square</option>
+                                <option value="2">triangle</option>
+                                <option value="3">sine</option>
+                                <option value="4">noise</option>
+                            </select>
+                        </div>
+                        <div>
+                            {this.transposeInput.labelNode}
+                            {this.transposeInput}
+                        </div>
+                        <div>
+                            {this.slideStepInput.labelNode}
+                            {this.slideStepInput}
+                        </div>
+                        <fieldset id="fieldset-phase">
+                            <legend>Phase</legend>
+                            <div>
+                                {this.phaseMinInput.labelNode}
+                                {this.phaseMinInput}
+                            </div>
+                            <div>
+                                {this.phaseMaxInput.labelNode}
+                                {this.phaseMaxInput}
+                            </div>
+                            <div>
+                                {this.phasePeriodInput.labelNode}
+                                {this.phasePeriodInput}
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Envelope</legend>
+                            <div>
+                                {this.decaySpeedInput.labelNode}
+                                {this.decaySpeedInput}
+                            </div>
+                            <div>
+                                {this.decayToInput.labelNode}
+                                {this.decayToInput}
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Vibrato</legend>
+                            <div>
+                                {this.vibratoDepthInput.labelNode}
+                                {this.vibratoDepthInput}
+                            </div>
+                            <div>
+                                {this.vibratoPeriodInput.labelNode}
+                                {this.vibratoPeriodInput}
+                            </div>
+                        </fieldset>
+                        <div class="section">
+                            <fieldset id="fieldset-harmonics">
+                                <legend>Harmonics</legend>
+                                <ul id="harmonics"></ul>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <label for="scrub">time</label> <input type="range" min="0" max="60" value="0" id="scrub" /> <span id="scrub-value"></span>
+                </div>
+                <ul id="keyboard"></ul>
+            </div>
+        );
+    }
+}
+
+const instrumentEditor = new InstrumentEditor();
+instrumentEditor.trackModel(instrument);
+document.querySelector(".editor").appendChild(instrumentEditor.node);
 
 class Key {
     constructor(container, oct, n){
@@ -138,11 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const instrumentSelector = document.getElementById("instrument");
     for (let i = 0; i < song.instruments.length; i++) {
+        const instrument = song.instruments[i];
         const option = document.createElement('option');
         option.value = i;
-        option.innerText = `${i+1} - ${song.instruments[i].name}`;
+        option.innerText = `${i+1} - ${instrument.name}`;
+        instrument.on("changeName", (name) => {
+            option.innerText = `${i+1} - ${name}`;
+        });
         instrumentSelector.appendChild(option);
-        instrumentSelectorOptions[i] = option;
     }
 
     const keyboard = document.getElementById("keyboard");
@@ -200,22 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initControl("wave-type", "waveType", (val) => {
         updateControlStateForWaveType(val);
     });
-    initControl("transpose", "transpose");
-    initControl("slide-step", "slideStep");
-    initControl("phase-min", "phaseMin");
-    initControl("phase-max", "phaseMax");
-    initControl("phase-period", "phasePeriod");
-    initControl("decay-to", "decayTo");
-    initControl("decay-speed", "decaySpeed");
-    initControl("vibrato-depth", "vibratoDepth");
-    initControl("vibrato-period", "vibratoPeriod");
-
-    const nameInput = document.getElementById("name");
-    nameInput.value = instrument.name;
-    nameInput.addEventListener('input', () => {
-        instrument.name = nameInput.value;
-        instrumentSelectorOptions[instrumentIndex].innerText = `${instrumentIndex+1} - ${instrument.name}`;
-    });
 
     const harmonicsUl = document.getElementById('harmonics');
     const initHarmonicControl = (i) => {
@@ -247,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     instrumentSelector.addEventListener('change', () => {
         instrumentIndex = parseInt(instrumentSelector.value);
         instrument = song.instruments[instrumentIndex];
-        nameInput.value = instrument.name;
+        instrumentEditor.trackModel(instrument);
         for (let i = 0; i < controls.length; i++) {
             controls[i].element.value = instrument[controls[i].param];
         }

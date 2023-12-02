@@ -3,6 +3,10 @@
     float: left;
 }
 
+.editor label {
+    padding-right: 4px;
+}
+
 .section {
     clear: both;
 }
