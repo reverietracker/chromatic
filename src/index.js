@@ -25,6 +25,24 @@ class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
         phaseMaxInput: NumberInput.forField(Wave.fields.phaseMax, {label: "Max"}),
         phasePeriodInput: NumberInput.forField(Wave.fields.phasePeriod, {label: "Period"}),
     }
+    constructor(options) {
+        super(options);
+        this.model = null;
+        this.waveTypeChangeHandler = (wt) => {
+            if (wt == waveType.NOISE || wt == waveType.SINE) {
+                this.node.setAttribute('disabled', 'true');
+            } else {
+                this.node.removeAttribute('disabled');
+            }
+        }
+    }
+    trackModel(model) {
+        if (this.model) this.model.removeListener("changeWaveType", this.waveTypeChangeHandler);
+        super.trackModel(model);
+        this.model = model;
+        this.model.on("changeWaveType", this.waveTypeChangeHandler);
+        this.waveTypeChangeHandler(this.model.waveType);
+    }
 }
 
 class EnvelopeFieldset extends Fieldset.withOptions({legend: "Envelope"}) {
@@ -175,23 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
     /*
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
-        elem.value = instrument[param];
         elem.addEventListener('input', () => {
-            instrument[param] = parseInt(elem.value);
             waveformGenerator = instrument.getFrameCallback(440);
             drawScopeAtScrubPosition();
-            if (onchange) onchange(elem.value);
         });
     }
     const updateControlStateForWaveType = (wt) => {
         if (wt == waveType.NOISE) {
-            phaseFieldset.setAttribute('disabled', 'true');
             harmonicsFieldset.setAttribute('disabled', 'true');
-        } else if (wt == waveType.SINE) {
-            phaseFieldset.setAttribute('disabled', 'true');
-            harmonicsFieldset.removeAttribute('disabled');
         } else {
-            phaseFieldset.removeAttribute('disabled');
             harmonicsFieldset.removeAttribute('disabled');
         }
     };
