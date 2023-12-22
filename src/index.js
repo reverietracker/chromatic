@@ -1,4 +1,4 @@
-import { Container, NumberInput, TextInput } from 'catwalk-ui';
+import { Container, NumberInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import "./chromatic.css";
 
@@ -21,6 +21,7 @@ let currentKey = null;
 
 class InstrumentEditor extends Container {
     static components = {
+        waveTypeInput: SelectInput.forField(Wave.fields.waveType, {label: "Wave type"}),
         nameInput: TextInput.forField(Wave.fields.name, {label: "Instrument name"}),
         transposeInput: NumberInput.forField(Wave.fields.transpose),
         slideStepInput: NumberInput.forField(Wave.fields.slideStep),
@@ -44,13 +45,8 @@ class InstrumentEditor extends Container {
                     </div>
                     <div id="parameters">
                         <div>
-                            <label for="wave-type">Wave type</label>
-                            <select id="wave-type">
-                                <option value="1" selected>square</option>
-                                <option value="2">triangle</option>
-                                <option value="3">sine</option>
-                                <option value="4">noise</option>
-                            </select>
+                            {this.waveTypeInput.labelNode}
+                            {this.waveTypeInput}
                         </div>
                         <div>
                             {this.transposeInput.labelNode}
@@ -146,6 +142,7 @@ class Key {
     release() {
         this.button.classList.remove('active');
         audio.stop();
+        currentKey = null;
     }
 }
 
@@ -193,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const phaseFieldset = document.getElementById("fieldset-phase");
     const harmonicsFieldset = document.getElementById("fieldset-harmonics");
     const controls = [];
+    /*
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
         elem.value = instrument[param];
@@ -219,10 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
             harmonicsFieldset.removeAttribute('disabled');
         }
     };
+    */
 
-    initControl("wave-type", "waveType", (val) => {
-        updateControlStateForWaveType(val);
-    });
+    //initControl("wave-type", "waveType", (val) => {
+    //    updateControlStateForWaveType(val);
+    //});
 
     const harmonicsUl = document.getElementById('harmonics');
     const initHarmonicControl = (i) => {
@@ -261,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 8; i++) {
             harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
         }
-        updateControlStateForWaveType(instrument.waveType);
+        // updateControlStateForWaveType(instrument.waveType);
 
         waveformGenerator = instrument.getFrameCallback(440);
         drawScopeAtScrubPosition();

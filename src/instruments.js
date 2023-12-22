@@ -8,7 +8,12 @@ export const waveType = {
 }
 
 export class Wave extends Model([
-    new fields.IntegerField('waveType', {default: waveType.SQUARE}),
+    new fields.EnumField('waveType', {choices: [
+        [waveType.SQUARE, "Square"],
+        [waveType.TRIANGLE, "Triangle"],
+        [waveType.SINE, "Sine"],
+        [waveType.NOISE, "Noise"],
+    ], default: waveType.SQUARE}),
     new fields.ValueField('name', {default: ""}),
     new fields.IntegerField('transpose', {default: 0, min: -24, max: 24}),
     new fields.IntegerField('slideStep', {default: 0, min: -256, max: 256, label: "Pitch slide step"}),
