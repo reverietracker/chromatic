@@ -1,4 +1,4 @@
-import { Container, NumberInput, SelectInput, TextInput } from 'catwalk-ui';
+import { Container, Fieldset, NumberInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import "./chromatic.css";
 
@@ -19,19 +19,38 @@ let instrumentIndex = 0;
 let waveformGenerator = instrument.getFrameCallback(440);
 let currentKey = null;
 
+class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
+    static components = {
+        phaseMinInput: NumberInput.forField(Wave.fields.phaseMin, {label: "Min"}),
+        phaseMaxInput: NumberInput.forField(Wave.fields.phaseMax, {label: "Max"}),
+        phasePeriodInput: NumberInput.forField(Wave.fields.phasePeriod, {label: "Period"}),
+    }
+}
+
+class EnvelopeFieldset extends Fieldset.withOptions({legend: "Envelope"}) {
+    static components = {
+        decaySpeedInput: NumberInput.forField(Wave.fields.decaySpeed),
+        decayToInput: NumberInput.forField(Wave.fields.decayTo),
+    }
+}
+
+class VibratoFieldset extends Fieldset.withOptions({legend: "Vibrato"}) {
+    static components = {
+        vibratoDepthInput: NumberInput.forField(Wave.fields.vibratoDepth, {label: "Depth"}),
+        vibratoPeriodInput: NumberInput.forField(Wave.fields.vibratoPeriod, {label: "Period"}),
+    }
+}
+
+
 class InstrumentEditor extends Container {
     static components = {
         waveTypeInput: SelectInput.forField(Wave.fields.waveType, {label: "Wave type"}),
         nameInput: TextInput.forField(Wave.fields.name, {label: "Instrument name"}),
         transposeInput: NumberInput.forField(Wave.fields.transpose),
         slideStepInput: NumberInput.forField(Wave.fields.slideStep),
-        phaseMinInput: NumberInput.forField(Wave.fields.phaseMin, {label: "Min"}),
-        phaseMaxInput: NumberInput.forField(Wave.fields.phaseMax, {label: "Max"}),
-        phasePeriodInput: NumberInput.forField(Wave.fields.phasePeriod, {label: "Period"}),
-        decaySpeedInput: NumberInput.forField(Wave.fields.decaySpeed),
-        decayToInput: NumberInput.forField(Wave.fields.decayTo),
-        vibratoDepthInput: NumberInput.forField(Wave.fields.vibratoDepth, {label: "Depth"}),
-        vibratoPeriodInput: NumberInput.forField(Wave.fields.vibratoPeriod, {label: "Period"}),
+        phaseFieldset: PhaseFieldset,
+        envelopeFieldset: EnvelopeFieldset,
+        vibratoFieldset: VibratoFieldset,
     }
 
     createNode() {
@@ -56,43 +75,9 @@ class InstrumentEditor extends Container {
                             {this.slideStepInput.labelNode}
                             {this.slideStepInput}
                         </div>
-                        <fieldset id="fieldset-phase">
-                            <legend>Phase</legend>
-                            <div>
-                                {this.phaseMinInput.labelNode}
-                                {this.phaseMinInput}
-                            </div>
-                            <div>
-                                {this.phaseMaxInput.labelNode}
-                                {this.phaseMaxInput}
-                            </div>
-                            <div>
-                                {this.phasePeriodInput.labelNode}
-                                {this.phasePeriodInput}
-                            </div>
-                        </fieldset>
-                        <fieldset>
-                            <legend>Envelope</legend>
-                            <div>
-                                {this.decaySpeedInput.labelNode}
-                                {this.decaySpeedInput}
-                            </div>
-                            <div>
-                                {this.decayToInput.labelNode}
-                                {this.decayToInput}
-                            </div>
-                        </fieldset>
-                        <fieldset>
-                            <legend>Vibrato</legend>
-                            <div>
-                                {this.vibratoDepthInput.labelNode}
-                                {this.vibratoDepthInput}
-                            </div>
-                            <div>
-                                {this.vibratoPeriodInput.labelNode}
-                                {this.vibratoPeriodInput}
-                            </div>
-                        </fieldset>
+                        {this.phaseFieldset}
+                        {this.envelopeFieldset}
+                        {this.vibratoFieldset}
                         <div class="section">
                             <fieldset id="fieldset-harmonics">
                                 <legend>Harmonics</legend>
@@ -187,9 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scrubValue.innerText = scrubControl.value;
     });
 
-    const phaseFieldset = document.getElementById("fieldset-phase");
-    const harmonicsFieldset = document.getElementById("fieldset-harmonics");
-    const controls = [];
     /*
     const initControl = (inputId, param, onchange) => {
         const elem = document.getElementById(inputId);
@@ -199,10 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
             waveformGenerator = instrument.getFrameCallback(440);
             drawScopeAtScrubPosition();
             if (onchange) onchange(elem.value);
-        });
-        controls.push({
-            element: elem,
-            param: param,
         });
     }
     const updateControlStateForWaveType = (wt) => {
@@ -254,9 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         instrumentIndex = parseInt(instrumentSelector.value);
         instrument = song.instruments[instrumentIndex];
         instrumentEditor.trackModel(instrument);
-        for (let i = 0; i < controls.length; i++) {
-            controls[i].element.value = instrument[controls[i].param];
-        }
         for (let i = 0; i < 8; i++) {
             harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
         }
