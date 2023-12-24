@@ -28,20 +28,13 @@ class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
     constructor(options) {
         super(options);
         this.model = null;
-        this.waveTypeChangeHandler = (wt) => {
+        this.trackField(Wave.fields.waveType, (wt) => {
             if (wt == waveType.NOISE || wt == waveType.SINE) {
                 this.node.setAttribute('disabled', 'true');
             } else {
                 this.node.removeAttribute('disabled');
             }
-        }
-    }
-    trackModel(model) {
-        if (this.model) this.model.removeListener("changeWaveType", this.waveTypeChangeHandler);
-        super.trackModel(model);
-        this.model = model;
-        this.model.on("changeWaveType", this.waveTypeChangeHandler);
-        this.waveTypeChangeHandler(this.model.waveType);
+        });
     }
 }
 
@@ -207,10 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     */
 
-    //initControl("wave-type", "waveType", (val) => {
-    //    updateControlStateForWaveType(val);
-    //});
-
     const harmonicsUl = document.getElementById('harmonics');
     const initHarmonicControl = (i) => {
         const input = document.createElement('input');
@@ -245,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 8; i++) {
             harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
         }
-        // updateControlStateForWaveType(instrument.waveType);
 
         waveformGenerator = instrument.getFrameCallback(440);
         drawScopeAtScrubPosition();
