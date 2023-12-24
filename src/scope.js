@@ -1,9 +1,20 @@
-export class Scope {
-    constructor(canvas) {
-        this.width = canvas.width;
-        this.height = canvas.height;
-        this.ctx = canvas.getContext('2d');
+import { Component } from 'catwalk-ui';
+
+export class Scope extends Component {
+    constructor() {
+        super();
+        this.width = 256;
+        this.height = 128;
     }
+
+    createNode() {
+        const node = (
+            <canvas className="scope" width={this.width} height={this.height}></canvas>
+        );
+        this.ctx = node.getContext('2d');
+        return node;
+    }
+
     clear() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.width, this.height);

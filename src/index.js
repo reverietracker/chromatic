@@ -62,6 +62,7 @@ class InstrumentEditor extends Container {
         phaseFieldset: PhaseFieldset,
         envelopeFieldset: EnvelopeFieldset,
         vibratoFieldset: VibratoFieldset,
+        scope: Scope,
     }
 
     createNode() {
@@ -71,7 +72,7 @@ class InstrumentEditor extends Container {
                     <div class="left-col">
                         {this.nameInput.labelNode}
                         {this.nameInput}
-                        <canvas id="scope" width="256" height="128"></canvas>
+                        {this.scope}
                     </div>
                     <div id="parameters">
                         <div>
@@ -171,8 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentKey) currentKey.release();
     });
 
-    const scopeCanvas = document.getElementById("scope");
-    const scope = new Scope(scopeCanvas);
+    const scope = instrumentEditor.scope;
     const scrubControl = document.getElementById("scrub");
     const scrubValue = document.getElementById("scrub-value");
     const drawScopeAtScrubPosition = () => {
