@@ -1,4 +1,4 @@
-import { Container, Fieldset, NumberInput, SelectInput, TextInput } from 'catwalk-ui';
+import { Container, Fieldset, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import "./chromatic.css";
 
@@ -16,7 +16,6 @@ const song = new Song();
 let instrument = song.instruments[0];
 let instrumentIndex = 0;
 
-let waveformGenerator = instrument.getFrameCallback(440);
 let currentKey = null;
 
 class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
@@ -63,6 +62,12 @@ class InstrumentEditor extends Container {
         envelopeFieldset: EnvelopeFieldset,
         vibratoFieldset: VibratoFieldset,
         scope: Scope,
+        scrubControl: RangeInput.withOptions({id: "scrub", label: "Time", min: 0, max: 60, value: 0}),
+    }
+
+    constructor() {
+        super();
+        this.scope.scrubControlNode = this.scrubControl.node;
     }
 
     createNode() {
@@ -99,7 +104,9 @@ class InstrumentEditor extends Container {
                     </div>
                 </div>
                 <div class="section">
-                    <label for="scrub">time</label> <input type="range" min="0" max="60" value="0" id="scrub" /> <span id="scrub-value"></span>
+                    {this.scrubControl.labelNode}
+                    {this.scrubControl}
+                    <span id="scrub-value"></span>
                 </div>
                 <ul id="keyboard"></ul>
             </div>
@@ -173,24 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const scope = instrumentEditor.scope;
-    const scrubControl = document.getElementById("scrub");
+    const scrubControl = instrumentEditor.scrubControl.node;
     const scrubValue = document.getElementById("scrub-value");
-    const drawScopeAtScrubPosition = () => {
-        scope.drawFrame(waveformGenerator(scrubControl.value));
-    }
     scrubControl.addEventListener('input', () => {
-        drawScopeAtScrubPosition();
+        scope.drawAtScrubPosition();
         scrubValue.innerText = scrubControl.value;
     });
 
     /*
-    const initControl = (inputId, param, onchange) => {
-        const elem = document.getElementById(inputId);
-        elem.addEventListener('input', () => {
-            waveformGenerator = instrument.getFrameCallback(440);
-            drawScopeAtScrubPosition();
-        });
-    }
     const updateControlStateForWaveType = (wt) => {
         if (wt == waveType.NOISE) {
             harmonicsFieldset.setAttribute('disabled', 'true');
@@ -213,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(input);
         input.addEventListener('input', () => {
             instrument.harmonics[i] = input.value;
-            waveformGenerator = instrument.getFrameCallback(440);
-            drawScopeAtScrubPosition();
+            scope.waveformGenerator = instrument.getFrameCallback(440);
+            scope.drawAtScrubPosition();
         })
     }
     for (var i = 0; i < 8; i++) {
@@ -234,18 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 8; i++) {
             harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
         }
-
-        waveformGenerator = instrument.getFrameCallback(440);
-        drawScopeAtScrubPosition();
     });
-
-    waveformGenerator = instrument.getFrameCallback(440);
-    drawScopeAtScrubPosition();
 
     audio.on('frame', (frameData) => {
         scope.drawFrame(frameData);
     });
     audio.on('stop', () => {
-        drawScopeAtScrubPosition();
+        scope.drawAtScrubPosition();
     })
 });
