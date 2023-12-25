@@ -26,7 +26,7 @@ export class Wave extends Model([
     new fields.IntegerField('vibratoPeriod', {default: 16, min: 0, max: 256}),
     new fields.ListField(
         'harmonics',
-        new fields.IntegerField('harmonic', {default: 0, min: 0, max: 1}),
+        new fields.NumberField('harmonic', {default: 0, min: 0, max: 1}),
         {length: 8, default: [1, 0, 0, 0, 0, 0, 0, 0]},
     ),
 ]) {

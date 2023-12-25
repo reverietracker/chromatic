@@ -1,4 +1,4 @@
-import { Container, Fieldset, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
+import { Component, Container, Fieldset, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import "./chromatic.css";
 
@@ -26,7 +26,6 @@ class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
     }
     constructor(options) {
         super(options);
-        this.model = null;
         this.trackField(Wave.fields.waveType, (wt) => {
             if (wt == waveType.NOISE || wt == waveType.SINE) {
                 this.node.setAttribute('disabled', 'true');
@@ -51,6 +50,69 @@ class VibratoFieldset extends Fieldset.withOptions({legend: "Vibrato"}) {
     }
 }
 
+class HarmonicsPanel extends Component {
+    static elementInput = NumberInput.forField(Wave.fields.harmonics.subfield, {attributes: {step: 0.1}});
+    static elementCount = Wave.fields.harmonics.length;
+
+    constructor(options) {
+        super(options);
+        this.trackField(Wave.fields.waveType, (wt) => {
+            if (wt == waveType.NOISE) {
+                this.node.setAttribute('disabled', 'true');
+            } else {
+                this.node.removeAttribute('disabled');
+            }
+        });
+        this.elementInputs = null;
+        this.changeHarmonicHandler = (i, val) => {
+            if (this.elementInputs) {
+                this.elementInputs[i].node.value = val;
+            }
+        }
+    }
+
+    createNode() {
+        this.elementInputs = [];
+        const ul = <ul id="harmonics"></ul>
+        for (let i = 0; i < HarmonicsPanel.elementCount; i++) {
+            const li = <li></li>;
+            const elementInput = this.createHarmonicInput(i);
+            this.elementInputs[i] = elementInput;
+            li.appendChild(elementInput.node);
+            ul.appendChild(li);
+        }
+        return (
+            <fieldset>
+                <legend>Harmonics</legend>
+                {ul}
+            </fieldset>
+        );
+    }
+    createHarmonicInput(i) {
+        const input = new HarmonicsPanel.elementInput();
+        input.node.addEventListener('change', () => {
+            if (this.model) {
+                this.model.setHarmonic(i, input.node.value);
+                // read back the value from the model, in case it was cleaned
+                input.node.value = this.model.harmonics[i];
+            }
+        });
+        return input;
+    }
+
+    trackModel(model) {
+        if (this.model) {
+            this.model.removeListener("changeHarmonic", this.changeHarmonicHandler);
+        }
+        super.trackModel(model);
+        if (this.elementInputs) {
+            for (let i = 0; i < HarmonicsPanel.elementCount; i++) {
+                this.elementInputs[i].node.value = model.harmonics[i];
+            }
+        }
+        model.on("changeHarmonic", this.changeHarmonicHandler);
+    }
+}
 
 class InstrumentEditor extends Container {
     static components = {
@@ -61,6 +123,7 @@ class InstrumentEditor extends Container {
         phaseFieldset: PhaseFieldset,
         envelopeFieldset: EnvelopeFieldset,
         vibratoFieldset: VibratoFieldset,
+        harmonicsPanel: HarmonicsPanel,
         scope: Scope,
         scrubControl: RangeInput.withOptions({id: "scrub", label: "Time", min: 0, max: 60, value: 0}),
     }
@@ -96,10 +159,7 @@ class InstrumentEditor extends Container {
                         {this.envelopeFieldset}
                         {this.vibratoFieldset}
                         <div class="section">
-                            <fieldset id="fieldset-harmonics">
-                                <legend>Harmonics</legend>
-                                <ul id="harmonics"></ul>
-                            </fieldset>
+                            {this.harmonicsPanel}
                         </div>
                     </div>
                 </div>
@@ -187,37 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scrubValue.innerText = scrubControl.value;
     });
 
-    /*
-    const updateControlStateForWaveType = (wt) => {
-        if (wt == waveType.NOISE) {
-            harmonicsFieldset.setAttribute('disabled', 'true');
-        } else {
-            harmonicsFieldset.removeAttribute('disabled');
-        }
-    };
-    */
-
-    const harmonicsUl = document.getElementById('harmonics');
-    const initHarmonicControl = (i) => {
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = 0;
-        input.max = 1;
-        input.step = 0.1;
-        input.value = instrument.harmonics[i];
-        const li = document.createElement('li');
-        harmonicsUl.appendChild(li);
-        li.appendChild(input);
-        input.addEventListener('input', () => {
-            instrument.harmonics[i] = input.value;
-            scope.waveformGenerator = instrument.getFrameCallback(440);
-            scope.drawAtScrubPosition();
-        })
-    }
-    for (var i = 0; i < 8; i++) {
-        initHarmonicControl(i);
-    }
-
     const generateCodeButton = document.getElementById("generate-code");
     const codeOutput = document.getElementById("code-output");
     generateCodeButton.addEventListener('click', () => {
@@ -228,9 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         instrumentIndex = parseInt(instrumentSelector.value);
         instrument = song.instruments[instrumentIndex];
         instrumentEditor.trackModel(instrument);
-        for (let i = 0; i < 8; i++) {
-            harmonicsUl.children[i].children[0].value = instrument.harmonics[i];
-        }
     });
 
     audio.on('frame', (frameData) => {
