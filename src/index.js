@@ -14,7 +14,6 @@ const audio = new AudioController();
 const song = new Song();
 
 let instrument = song.instruments[0];
-let instrumentIndex = 0;
 
 let currentKey = null;
 
@@ -254,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     instrumentSelector.addEventListener('change', () => {
-        instrumentIndex = parseInt(instrumentSelector.value);
+        const instrumentIndex = parseInt(instrumentSelector.value);
         instrument = song.instruments[instrumentIndex];
         instrumentEditor.trackModel(instrument);
     });
