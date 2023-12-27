@@ -1,4 +1,4 @@
-import { Component, Container, Fieldset, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
+import { Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import "./chromatic.css";
 
@@ -49,10 +49,9 @@ class VibratoFieldset extends Fieldset.withOptions({legend: "Vibrato"}) {
     }
 }
 
-class HarmonicsPanel extends Component {
-    static elementInput = NumberInput.forField(Wave.fields.harmonics.subfield, {attributes: {step: 0.1}});
-    static elementCount = Wave.fields.harmonics.length;
-
+class HarmonicsPanel extends InputList.forField(Wave.fields.harmonics, {
+    elementInputClass: NumberInput.forField(Wave.fields.harmonics.subfield, {attributes: {step: 0.1}}),
+}) {
     constructor(options) {
         super(options);
         this.trackField(Wave.fields.waveType, (wt) => {
@@ -62,54 +61,17 @@ class HarmonicsPanel extends Component {
                 this.node.removeAttribute('disabled');
             }
         });
-        this.elementInputs = null;
-        this.changeHarmonicHandler = (i, val) => {
-            if (this.elementInputs) {
-                this.elementInputs[i].node.value = val;
-            }
-        }
     }
 
     createNode() {
-        this.elementInputs = [];
-        const ul = <ul id="harmonics"></ul>
-        for (let i = 0; i < HarmonicsPanel.elementCount; i++) {
-            const li = <li></li>;
-            const elementInput = this.createHarmonicInput(i);
-            this.elementInputs[i] = elementInput;
-            li.appendChild(elementInput.node);
-            ul.appendChild(li);
-        }
+        const ul = super.createNode();
+        ul.id = "harmonics";
         return (
             <fieldset>
                 <legend>Harmonics</legend>
                 {ul}
             </fieldset>
         );
-    }
-    createHarmonicInput(i) {
-        const input = new HarmonicsPanel.elementInput();
-        input.node.addEventListener('change', () => {
-            if (this.model) {
-                this.model.setHarmonic(i, input.node.value);
-                // read back the value from the model, in case it was cleaned
-                input.node.value = this.model.harmonics[i];
-            }
-        });
-        return input;
-    }
-
-    trackModel(model) {
-        if (this.model) {
-            this.model.removeListener("changeHarmonic", this.changeHarmonicHandler);
-        }
-        super.trackModel(model);
-        if (this.elementInputs) {
-            for (let i = 0; i < HarmonicsPanel.elementCount; i++) {
-                this.elementInputs[i].node.value = model.harmonics[i];
-            }
-        }
-        model.on("changeHarmonic", this.changeHarmonicHandler);
     }
 }
 
