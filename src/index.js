@@ -23,16 +23,6 @@ class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
         phaseMaxInput: NumberInput.forField(Wave.fields.phaseMax, {label: "Max"}),
         phasePeriodInput: NumberInput.forField(Wave.fields.phasePeriod, {label: "Period"}),
     }
-    constructor(options) {
-        super(options);
-        this.trackField(Wave.fields.waveType, (wt) => {
-            if (wt == waveType.NOISE || wt == waveType.SINE) {
-                this.node.setAttribute('disabled', 'true');
-            } else {
-                this.node.removeAttribute('disabled');
-            }
-        });
-    }
 }
 
 class EnvelopeFieldset extends Fieldset.withOptions({legend: "Envelope"}) {
@@ -52,17 +42,6 @@ class VibratoFieldset extends Fieldset.withOptions({legend: "Vibrato"}) {
 class HarmonicsPanel extends InputList.forField(Wave.fields.harmonics, {
     elementInputClass: NumberInput.forField(Wave.fields.harmonics.subfield, {attributes: {step: 0.1}}),
 }) {
-    constructor(options) {
-        super(options);
-        this.trackField(Wave.fields.waveType, (wt) => {
-            if (wt == waveType.NOISE) {
-                this.node.setAttribute('disabled', 'true');
-            } else {
-                this.node.removeAttribute('disabled');
-            }
-        });
-    }
-
     createNode() {
         const ul = super.createNode();
         ul.id = "harmonics";
@@ -92,6 +71,32 @@ class InstrumentEditor extends Container {
     constructor() {
         super();
         this.scope.scrubControlNode = this.scrubControl.node;
+
+        this.trackField(Wave.fields.waveType, (wt) => {
+            if (wt == waveType.NOISE || wt == waveType.SINE || wt == waveType.SAMPLE) {
+                this.phaseFieldset.node.setAttribute('disabled', 'true');
+            } else {
+                this.phaseFieldset.node.removeAttribute('disabled');
+            }
+
+            if (wt == waveType.NOISE || wt == waveType.SAMPLE) {
+                this.harmonicsPanel.node.setAttribute('disabled', 'true');
+            } else {
+                this.harmonicsPanel.node.removeAttribute('disabled');
+            }
+
+            if (wt == waveType.SAMPLE) {
+                this.envelopeFieldset.node.setAttribute('disabled', 'true');
+                this.vibratoFieldset.node.setAttribute('disabled', 'true');
+                this.slideStepInput.node.setAttribute('disabled', 'true');
+                this.transposeInput.node.setAttribute('disabled', 'true');
+            } else {
+                this.envelopeFieldset.node.removeAttribute('disabled');
+                this.vibratoFieldset.node.removeAttribute('disabled');
+                this.slideStepInput.node.removeAttribute('disabled');
+                this.transposeInput.node.removeAttribute('disabled');
+            }
+        });
     }
 
     createNode() {
