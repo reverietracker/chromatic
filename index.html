@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Chromatic</title>
+    <script defer src="bundle.js"></script><link href="main.css" rel="stylesheet"></head>
+    <body>
+        <div class="editor">
+            <div class="toolbar">
+                <label for="instrument">Instruments</label> <select id="instrument"></select>
+                <div id="master-volume-container">
+                    <label for="master-volume">master volume</label> <input type="range" min="0" max="500" value="250" id="master-volume">
+                </div>
+            </div>
+
+        </div>
+        <div class="output">
+            <button id="generate-code">Generate code</button>
+            <textarea id="code-output" readonly></textarea>
+        </div>
+    </body>
+</html>
