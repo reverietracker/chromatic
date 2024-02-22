@@ -10,7 +10,7 @@ export class Song extends Model([
     ),
 ]) {
     getLuaCode() {
-        return "{\n" + this.instruments.map((instrument) => {
+        return "{\n" + this.instruments.slice(1).map((instrument) => {
             return `${instrument.getLuaCode()},`;
         }).join("\n") + "\n}";
     }

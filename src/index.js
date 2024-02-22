@@ -13,7 +13,7 @@ const audio = new AudioController();
 
 const song = new Song();
 
-let instrument = song.instruments[0];
+let instrument = song.instruments[1];
 
 let currentKey = null;
 
@@ -184,13 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     const instrumentSelector = document.getElementById("instrument");
-    for (let i = 0; i < song.instruments.length; i++) {
+    for (let i = 1; i < song.instruments.length; i++) {
         const instrument = song.instruments[i];
         const option = document.createElement('option');
         option.value = i;
-        option.innerText = `${i+1} - ${instrument.name}`;
+        option.innerText = `${i} - ${instrument.name}`;
         instrument.on("changeName", (name) => {
-            option.innerText = `${i+1} - ${name}`;
+            option.innerText = `${i} - ${name}`;
         });
         instrumentSelector.appendChild(option);
     }
