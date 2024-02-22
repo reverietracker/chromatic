@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "catwalk": "^0.1.0",
-    "catwalk-ui": "^0.1.0"
+    "catwalk-ui": "^0.1.0",
+    "save-file": "^2.3.1"
   }
 }

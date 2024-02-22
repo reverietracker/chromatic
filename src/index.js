@@ -1,4 +1,5 @@
 import { Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
+import { saveSync } from 'save-file';
 
 import "./chromatic.css";
 
@@ -211,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
     scrubControl.addEventListener('input', () => {
         scope.drawAtScrubPosition();
         scrubValue.innerText = scrubControl.value;
+    });
+
+    const saveButton = document.getElementById("save");
+    saveButton.addEventListener('click', () => {
+        saveSync(song.toJSON(), "song.cmt");
     });
 
     const generateCodeButton = document.getElementById("generate-code");
