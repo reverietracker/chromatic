@@ -1,5 +1,6 @@
 import { Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 import { saveSync } from 'save-file';
+import fileDialog from 'file-dialog';
 
 import "./chromatic.css";
 
@@ -12,9 +13,7 @@ const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 const audio = new AudioController();
 
-const song = new Song();
-
-let instrument = song.instruments[1];
+let song, instrument;
 
 let currentKey = null;
 
@@ -142,8 +141,26 @@ class InstrumentEditor extends Container {
 }
 
 const instrumentEditor = new InstrumentEditor();
-instrumentEditor.trackModel(instrument);
 document.querySelector(".editor").appendChild(instrumentEditor.node);
+const instrumentSelector = document.getElementById("instrument");
+
+const openSong = (newSong) => {
+    song = newSong;
+    instrument = song.instruments[1];
+    instrumentEditor.trackModel(instrument);
+
+    instrumentSelector.replaceChildren();
+    for (let i = 1; i < song.instruments.length; i++) {
+        const instrument = song.instruments[i];
+        const option = document.createElement('option');
+        option.value = i;
+        option.innerText = `${i} - ${instrument.name}`;
+        instrument.on("changeName", (name) => {
+            option.innerText = `${i} - ${name}`;
+        });
+        instrumentSelector.appendChild(option);
+    }
+}
 
 class Key {
     constructor(container, oct, n){
@@ -184,18 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.setVolume(masterVolumeControl.value / 1000);
     })
 
-    const instrumentSelector = document.getElementById("instrument");
-    for (let i = 1; i < song.instruments.length; i++) {
-        const instrument = song.instruments[i];
-        const option = document.createElement('option');
-        option.value = i;
-        option.innerText = `${i} - ${instrument.name}`;
-        instrument.on("changeName", (name) => {
-            option.innerText = `${i} - ${name}`;
-        });
-        instrumentSelector.appendChild(option);
-    }
-
     const keyboard = document.getElementById("keyboard");
     for (let oct=1; oct<4; oct++) {
         for (let n=0; n<12; n++) {
@@ -212,6 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
     scrubControl.addEventListener('input', () => {
         scope.drawAtScrubPosition();
         scrubValue.innerText = scrubControl.value;
+    });
+
+    const openButton = document.getElementById("open");
+    openButton.addEventListener('click', () => {
+        fileDialog().then(files => {
+            files[0].text().then(text => {
+                const newSong = Song.fromJSON(text);
+                openSong(newSong);
+            });
+        });
     });
 
     const saveButton = document.getElementById("save");
@@ -236,5 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     audio.on('stop', () => {
         scope.drawAtScrubPosition();
-    })
+    });
+
+    openSong(new Song());
 });
