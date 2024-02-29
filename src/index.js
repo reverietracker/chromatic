@@ -234,10 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSync(song.toJSON(), "song.cmt");
     });
 
-    const generateCodeButton = document.getElementById("generate-code");
-    const codeOutput = document.getElementById("code-output");
-    generateCodeButton.addEventListener('click', () => {
-        codeOutput.value = song.getLuaCode();
+    const exportButton = document.getElementById("export");
+    exportButton.addEventListener('click', () => {
+        saveSync(song.getLuaCode(), "song.lua");
     });
 
     instrumentSelector.addEventListener('change', () => {
