@@ -14,7 +14,7 @@ export class Wave extends Model([
         [waveType.TRIANGLE, "Triangle"],
         [waveType.SINE, "Sine"],
         [waveType.NOISE, "Noise"],
-        [waveType.SAMPLE, "Sample"],
+        // [waveType.SAMPLE, "Sample"],
     ], default: waveType.SQUARE}),
     new fields.ValueField('name', {default: ""}),
     new fields.IntegerField('transpose', {default: 0, min: -24, max: 24}),
