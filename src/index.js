@@ -101,7 +101,7 @@ class InstrumentEditor extends Container {
 
     createNode() {
         return (
-            <div class="instrument-editor">
+            <div>
                 <div class="section">
                     <div class="left-col">
                         {this.nameInput.labelNode}
@@ -141,7 +141,7 @@ class InstrumentEditor extends Container {
 }
 
 const instrumentEditor = new InstrumentEditor();
-document.querySelector(".editor").appendChild(instrumentEditor.node);
+document.querySelector(".instrument-editor").appendChild(instrumentEditor.node);
 const instrumentSelector = document.getElementById("instrument");
 
 const openSong = (newSong) => {
@@ -238,6 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
     exportButton.addEventListener('click', () => {
         saveSync(song.getLuaCode(), "song.lua");
     });
+
+    const openInstrumentEditorButton = document.getElementById("open-instrument-editor");
+    const instrumentEditorContainer = document.querySelector(".instrument-editor");
+    instrumentEditorContainer.style.display = 'none';
+    openInstrumentEditorButton.addEventListener('click', () => {
+        instrumentEditorContainer.style.display = 'block';
+    });
+    const closeInstrumentEditorButton = document.getElementById("close-instrument-editor");
+    closeInstrumentEditorButton.addEventListener('click', () => {
+        instrumentEditorContainer.style.display = 'none';
+    });
+
 
     instrumentSelector.addEventListener('change', () => {
         const instrumentIndex = parseInt(instrumentSelector.value);

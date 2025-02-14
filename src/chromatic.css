@@ -1,9 +1,14 @@
-.editor {
+.instrument-editor-positioner {
+    position: absolute;
+    left: 50%;
+}
+.instrument-editor {
     width: 800px;
-    float: left;
+    position: absolute;
+    left: -400px;
 }
 
-.editor label {
+.instrument-editor label {
     padding-right: 4px;
 }
 
