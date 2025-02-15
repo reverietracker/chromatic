@@ -49,29 +49,35 @@ export class PatternGrid extends Component {
         return node;
     }
     globalKeyDownHandlers = {
-        'ArrowUp': (row, col) => {
+        'ArrowUp': (row, col, e) => {
             this.cells[(row + this.cells.length - 1) % this.cells.length][col].focus();
+            e.preventDefault();
         },
-        'ArrowDown': (row, col) => {
+        'ArrowDown': (row, col, e) => {
             this.cells[(row + 1) % this.cells.length][col].focus();
+            e.preventDefault();
         },
-        'ArrowLeft': (row, col) => {
+        'ArrowLeft': (row, col, e) => {
             this.cells[row][(col + this.cells[row].length - 1) % this.cells[row].length].focus();
+            e.preventDefault();
         },
-        'ArrowRight': (row, col) => {
+        'ArrowRight': (row, col, e) => {
             this.cells[row][(col + 1) % this.cells[row].length].focus();
+            e.preventDefault();
         },
-        'PageUp': (row, col) => {
+        'PageUp': (row, col, e) => {
             this.cells[0][col].focus();
+            e.preventDefault();
         },
-        'PageDown': (row, col) => {
+        'PageDown': (row, col, e) => {
             this.cells[this.cells.length - 1][col].focus();
+            e.preventDefault();
         }
     }
 
     keyDown(row, col, e) {
         if (e.key in this.globalKeyDownHandlers) {
-            this.globalKeyDownHandlers[e.key](row, col);
+            this.globalKeyDownHandlers[e.key](row, col, e);
             return;
         }
 

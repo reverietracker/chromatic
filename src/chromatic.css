@@ -105,7 +105,11 @@
 }
 
 .pattern-grid {
+    display: block;
     font-family: monospace;
+    position: relative;
+    height: 500px;
+    overflow-y: auto;
 }
 .pattern-grid td {
     cursor: default;
