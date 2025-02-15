@@ -14,12 +14,13 @@ let song;
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
-const patternGrid = new PatternGrid();
+const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);
 
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
+    patternGrid.song = song;
     patternGrid.trackModel(song.patterns[1]);
 }
 

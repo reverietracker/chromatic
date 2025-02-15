@@ -21,14 +21,17 @@ const formatInstrument = (val) => {
 }
 
 export class PatternGrid extends Component {
-    constructor() {
+    constructor(audio) {
         super();
+        this.audio = audio;
         this.cells = [];
+        this.lastInstrumentNumber = 1;
 
         this.noteKeyDownHandlers = {};
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (row) => {
                 this.model.setRow(row, 'note', i);
+                this.playRow(row);
             }
         });
         this.noteKeyDownHandlers['0'] = (row) => {
@@ -38,9 +41,28 @@ export class PatternGrid extends Component {
         '0123456789abcdef'.split('').forEach((key, i) => {
             this.instrumentKeyDownHandlers[key] = (row) => {
                 this.model.setRow(row, 'instrument', i);
+                this.playRow(row);
             }
         });
     }
+
+    playRow(rowNumber) {
+        const row = this.model.rows[rowNumber];
+        const note = row.note;
+        if (note === 0) return;
+        const frequency = notesByNum[note].frequency;
+
+        const instrumentNumber = row.instrument || this.lastInstrumentNumber;
+        this.lastInstrumentNumber = instrumentNumber;
+        const instrument = this.song.instruments[instrumentNumber];
+
+        const frameCallback = instrument.getFrameCallback(frequency);
+        this.audio.play(frameCallback);
+    }
+    releaseRow() {
+        this.audio.stop();
+    }
+
     createNode() {
         const node = (
             <table className="pattern-grid">
@@ -81,11 +103,15 @@ export class PatternGrid extends Component {
             return;
         }
 
-        if (col === 0 && e.key in this.noteKeyDownHandlers) {
+        if (col === 0 && e.key in this.noteKeyDownHandlers && !e.repeat) {
             this.noteKeyDownHandlers[e.key](row);
-        } else if (col === 1 && e.key in this.instrumentKeyDownHandlers) {
+        } else if (col === 1 && e.key in this.instrumentKeyDownHandlers && !e.repeat) {
             this.instrumentKeyDownHandlers[e.key](row);
         }
+    }
+    keyUp() {
+        /* TODO: only call releaseRow if the key is actually one that triggered a note */
+        this.releaseRow();
     }
     changeRowHandler = (row, field, value) => {
         if (field == 'note') {
@@ -118,6 +144,9 @@ export class PatternGrid extends Component {
             rowCells.map((cell, j) => {
                 cell.addEventListener('keydown', (e) => {
                     this.keyDown(i, j, e);
+                });
+                cell.addEventListener('keyup', (e) => {
+                    this.keyUp(i, j, e);
                 });
             });
             this.cells.push(rowCells);

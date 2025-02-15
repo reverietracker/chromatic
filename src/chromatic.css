@@ -6,6 +6,7 @@
     width: 800px;
     position: absolute;
     left: -400px;
+    z-index: 100;
 }
 
 .instrument-panel label {
