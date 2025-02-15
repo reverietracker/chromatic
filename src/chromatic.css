@@ -1,14 +1,14 @@
-.instrument-editor-positioner {
+.instrument-panel-positioner {
     position: absolute;
     left: 50%;
 }
-.instrument-editor {
+.instrument-panel {
     width: 800px;
     position: absolute;
     left: -400px;
 }
 
-.instrument-editor label {
+.instrument-panel label {
     padding-right: 4px;
 }
 

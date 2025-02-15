@@ -1,4 +1,4 @@
-import { Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
+import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
 import { Wave, waveType } from "../models/instruments";
 import { Scope } from "./scope";
@@ -78,7 +78,7 @@ class Key {
     }
 }
 
-export class InstrumentEditor extends Container {
+class InstrumentEditor extends Container {
     static components = {
         waveTypeInput: SelectInput.forField(Wave.fields.waveType, {label: "Wave type"}),
         nameInput: TextInput.forField(Wave.fields.name, {label: "Instrument name"}),
@@ -96,7 +96,7 @@ export class InstrumentEditor extends Container {
         super();
         this.audio = audio;
         this.scope.scrubControlNode = this.scrubControl.node;
-
+    
         this.trackField(Wave.fields.waveType, (wt) => {
             if (wt == waveType.NOISE || wt == waveType.SINE || wt == waveType.SAMPLE) {
                 this.phaseFieldset.node.setAttribute('disabled', 'true');
@@ -121,6 +121,13 @@ export class InstrumentEditor extends Container {
                 this.slideStepInput.node.removeAttribute('disabled');
                 this.transposeInput.node.removeAttribute('disabled');
             }
+        });
+
+        this.audio.on('frame', (frameData) => {
+            this.scope.drawFrame(frameData);
+        });
+        this.audio.on('stop', () => {
+            this.scope.drawAtScrubPosition();
         });
     }
 
@@ -173,6 +180,57 @@ export class InstrumentEditor extends Container {
             if (currentKey) currentKey.release();
         });
 
+        const scrubControl = this.scrubControl.node;
+        const scrubValue = node.querySelector("#scrub-value");
+        scrubControl.addEventListener('input', () => {
+            this.scope.drawAtScrubPosition();
+            scrubValue.innerText = scrubControl.value;
+        });
+
         return node;
+    }
+}
+
+export class InstrumentPanel extends Component {
+    constructor(audio) {
+        super();
+        this.instrumentEditor = new InstrumentEditor(audio);
+    }
+
+    createNode() {
+        const node = (
+            <div class="instrument-panel">
+                <div class="toolbar">
+                    <label for="instrument">Instruments</label> <select id="instrument"></select>
+                    <button id="close-instrument-panel">Close</button>
+                </div>
+                {this.instrumentEditor}
+            </div>
+        );
+        this.instrumentSelector = node.querySelector("#instrument");
+        this.instrumentSelector.addEventListener('change', () => {
+            const instrumentIndex = parseInt(this.instrumentSelector.value);
+            const instrument = this.model.instruments[instrumentIndex];
+            this.instrumentEditor.trackModel(instrument);
+        });
+    
+        return node;
+    }
+
+    trackModel(song) {
+        super.trackModel(song);
+        this.instrumentEditor.trackModel(song.instruments[1]);
+
+        this.instrumentSelector.replaceChildren();
+        for (let i = 1; i < song.instruments.length; i++) {
+            const instrument = song.instruments[i];
+            const option = document.createElement('option');
+            option.value = i;
+            option.innerText = `${i} - ${instrument.name}`;
+            instrument.on("changeName", (name) => {
+                option.innerText = `${i} - ${name}`;
+            });
+            this.instrumentSelector.appendChild(option);
+        }
     }
 }
