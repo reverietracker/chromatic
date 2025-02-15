@@ -1,12 +1,18 @@
 import { Model, fields } from 'catwalk';
 
 import { Wave } from "./instruments";
+import { Pattern } from "./pattern";
 
 export class Song extends Model([
     new fields.ListField(
         'instruments',
         new fields.ModelField('instrument', Wave),
         {startIndex: 1, length: 15}
+    ),
+    new fields.ListField(
+        'patterns',
+        new fields.ModelField('pattern', Pattern),
+        {length: 64},
     ),
 ]) {
     getLuaCode() {
