@@ -5,9 +5,9 @@ import fileDialog from 'file-dialog';
 import "./chromatic.css";
 
 import { AudioController } from "./audio";
-import { Wave, waveType } from "./instruments";
+import { Wave, waveType } from "./models/instruments";
 import { Scope } from "./scope";
-import { Song } from "./song";
+import { Song } from "./models/song";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
