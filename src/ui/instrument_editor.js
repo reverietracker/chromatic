@@ -3,6 +3,8 @@ import { Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, T
 import { Wave, waveType } from "../models/instruments";
 import { Scope } from "./scope";
 
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 
 class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
     static components = {
@@ -41,6 +43,41 @@ class HarmonicsPanel extends InputList.forField(Wave.fields.harmonics, {
     }
 }
 
+let currentKey = null;
+
+class Key {
+    constructor(container, oct, n, editor){
+        this.editor = editor;
+        const noteVal = (oct*12 + n) - 33;
+        const noteName = NOTE_NAMES[n] + oct;
+        this.frequency = 440 * 2**(noteVal/12);
+        this.button = document.createElement('button');
+        this.button.className = 'key';
+        if ([1, 3, 6, 8, 10].includes(n)) {
+            this.button.classList.add('black');
+        } else {
+            this.button.classList.add('white');
+        }
+        this.button.style.left = (((oct-1) * 7 + KEY_POSITIONS[n]) * 32) + 'px';
+        this.button.innerText = noteName;
+        container.appendChild(this.button);
+        this.button.addEventListener("mousedown", () => {
+            this.play();
+        });
+    }
+    play() {
+        currentKey = this;
+        this.button.classList.add('active');
+        const frameCallback = this.editor.model.getFrameCallback(this.frequency);
+        this.editor.audio.play(frameCallback);
+    }
+    release() {
+        this.button.classList.remove('active');
+        this.editor.audio.stop();
+        currentKey = null;
+    }
+}
+
 export class InstrumentEditor extends Container {
     static components = {
         waveTypeInput: SelectInput.forField(Wave.fields.waveType, {label: "Wave type"}),
@@ -55,8 +92,9 @@ export class InstrumentEditor extends Container {
         scrubControl: RangeInput.withOptions({id: "scrub", label: "Time", min: 0, max: 60, value: 0}),
     }
 
-    constructor() {
+    constructor(audio) {
         super();
+        this.audio = audio;
         this.scope.scrubControlNode = this.scrubControl.node;
 
         this.trackField(Wave.fields.waveType, (wt) => {
@@ -87,7 +125,7 @@ export class InstrumentEditor extends Container {
     }
 
     createNode() {
-        return (
+        const node = (
             <div>
                 <div class="section">
                     <div class="left-col">
@@ -124,5 +162,17 @@ export class InstrumentEditor extends Container {
                 <ul id="keyboard"></ul>
             </div>
         );
+        const keyboard = node.querySelector("#keyboard");
+
+        for (let oct=1; oct<4; oct++) {
+            for (let n=0; n<12; n++) {
+                new Key(keyboard, oct, n, this);
+            }
+        }
+        window.addEventListener('mouseup', () => {
+            if (currentKey) currentKey.release();
+        });
+
+        return node;
     }
 }
