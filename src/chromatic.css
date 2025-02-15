@@ -103,3 +103,17 @@
     width: 100%;
     height: 400px;
 }
+
+.pattern-grid {
+    font-family: monospace;
+}
+.pattern-grid td {
+    cursor: default;
+}
+.pattern-grid td:focus {
+    outline: 1px solid black;
+    background-color: #ffff88;
+}
+.pattern-grid .row-number {
+    color: #444;
+}

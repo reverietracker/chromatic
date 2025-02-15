@@ -6,6 +6,7 @@ import "./chromatic.css";
 import { AudioController } from "./audio";
 import { Song } from "./models/song";
 import { InstrumentPanel } from "./ui/instrument_editor";
+import { PatternGrid } from './ui/pattern_grid';
 
 const audio = new AudioController();
 
@@ -13,10 +14,13 @@ let song;
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
+const patternGrid = new PatternGrid();
+document.body.appendChild(patternGrid.node);
 
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
+    patternGrid.trackModel(song.patterns[1]);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -7,12 +7,12 @@ export class Song extends Model([
     new fields.ListField(
         'instruments',
         new fields.ModelField('instrument', Wave),
-        {startIndex: 1, length: 15}
+        {startIndex: 1, length: 15},
     ),
     new fields.ListField(
         'patterns',
         new fields.ModelField('pattern', Pattern),
-        {length: 64},
+        {startIndex: 1, length: 63},
     ),
 ]) {
     getLuaCode() {

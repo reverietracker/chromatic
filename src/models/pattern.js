@@ -5,6 +5,7 @@ export class Pattern extends Model([
         'rows',
         new fields.StructField('row', [
             new fields.IntegerField('note', {default: 0}),
+            new fields.IntegerField('instrument', {default: 0}),
         ]),
         {length: 64},
     ),
