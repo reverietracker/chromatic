@@ -13,10 +13,33 @@ for (let oct = 1; oct < 4; oct++) {
     }
 }
 
+const formatNote = (note) => {
+    return note === 0 ? '---' : notesByNum[note].name;
+}
+const formatInstrument = (val) => {
+    return val.toString(16).toUpperCase();
+}
+
 export class PatternGrid extends Component {
     constructor() {
         super();
         this.cells = [];
+
+        this.noteKeyDownHandlers = {};
+        '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
+            this.noteKeyDownHandlers[key] = (row) => {
+                this.model.setRow(row, 'note', i);
+            }
+        });
+        this.noteKeyDownHandlers['0'] = (row) => {
+            this.model.setRow(row, 'note', 0);
+        };
+        this.instrumentKeyDownHandlers = {};
+        '0123456789abcdef'.split('').forEach((key, i) => {
+            this.instrumentKeyDownHandlers[key] = (row) => {
+                this.model.setRow(row, 'instrument', i);
+            }
+        });
     }
     createNode() {
         const node = (
@@ -25,7 +48,50 @@ export class PatternGrid extends Component {
         );
         return node;
     }
+    globalKeyDownHandlers = {
+        'ArrowUp': (row, col) => {
+            this.cells[(row + this.cells.length - 1) % this.cells.length][col].focus();
+        },
+        'ArrowDown': (row, col) => {
+            this.cells[(row + 1) % this.cells.length][col].focus();
+        },
+        'ArrowLeft': (row, col) => {
+            this.cells[row][(col + this.cells[row].length - 1) % this.cells[row].length].focus();
+        },
+        'ArrowRight': (row, col) => {
+            this.cells[row][(col + 1) % this.cells[row].length].focus();
+        },
+        'PageUp': (row, col) => {
+            this.cells[0][col].focus();
+        },
+        'PageDown': (row, col) => {
+            this.cells[this.cells.length - 1][col].focus();
+        }
+    }
+
+    keyDown(row, col, e) {
+        if (e.key in this.globalKeyDownHandlers) {
+            this.globalKeyDownHandlers[e.key](row, col);
+            return;
+        }
+
+        if (col === 0 && e.key in this.noteKeyDownHandlers) {
+            this.noteKeyDownHandlers[e.key](row);
+        } else if (col === 1 && e.key in this.instrumentKeyDownHandlers) {
+            this.instrumentKeyDownHandlers[e.key](row);
+        }
+    }
+    changeRowHandler = (row, field, value) => {
+        if (field == 'note') {
+            this.cells[row][0].innerText = formatNote(value);
+        } else {
+            this.cells[row][1].innerText = formatInstrument(value);
+        }
+    }
     trackModel(model) {
+        if (this.model) {
+            this.model.removeListener('changeRow', this.changeRowHandler);
+        }
         super.trackModel(model);
         this.node.replaceChildren();
         this.cells = [];
@@ -34,30 +100,18 @@ export class PatternGrid extends Component {
             const rowCells = [
                 (
                     <td tabindex="0">
-                        {row.note === 0 ? '---' : notesByNum[row.note].name}
+                        {formatNote(row.note)}
                     </td>
                 ),
                 (
                     <td tabindex="0">
-                        {row.instrument}
+                        {formatInstrument(row.instrument)}
                     </td>
                 ),
             ]
             rowCells.map((cell, j) => {
                 cell.addEventListener('keydown', (e) => {
-                    if (e.key === 'ArrowUp') {
-                        this.cells[(i + this.cells.length - 1) % this.cells.length][j].focus();
-                    } else if (e.key === 'ArrowDown') {
-                        this.cells[(i + 1) % this.cells.length][j].focus();
-                    } else if (e.key === 'ArrowLeft') {
-                        this.cells[i][(j + rowCells.length - 1) % rowCells.length].focus();
-                    } else if (e.key === 'ArrowRight') {
-                        this.cells[i][(j + 1) % rowCells.length].focus();
-                    } else if (e.key === 'PageUp') {
-                        this.cells[0][j].focus();
-                    } else if (e.key === 'PageDown') {
-                        this.cells[this.cells.length - 1][j].focus();
-                    }
+                    this.keyDown(i, j, e);
                 });
             });
             this.cells.push(rowCells);
@@ -70,5 +124,6 @@ export class PatternGrid extends Component {
             );
             this.node.appendChild(rowNode);
         }
+        this.model.on("changeRow", this.changeRowHandler);
     }
 }
