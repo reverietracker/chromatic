@@ -115,7 +115,7 @@ export class PatternGrid extends Component {
 
         this.audio = audio;
         this.cells = [];
-        this.lastInstrumentNumber = 1;
+        this.lastInstrumentNumber = [1, 1, 1, 1];
 
         this.channelChangeHandlers = [];
         for (let i = 0; i < 4; i++) {
@@ -128,7 +128,7 @@ export class PatternGrid extends Component {
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (channelIndex, row) => {
                 this.model.patterns[channelIndex + 1].setRow(row, 'note', i);
-                this.playRow(channelIndex, row);
+                this.playRow(row);
             }
         });
         this.noteKeyDownHandlers['0'] = (channelIndex, row) => {
@@ -138,32 +138,39 @@ export class PatternGrid extends Component {
         '0123456789abcdef'.split('').forEach((key, i) => {
             this.instrumentKeyDownHandlers[key] = (channelIndex, row) => {
                 this.model.patterns[channelIndex + 1].setRow(row, 'instrument', i);
-                this.playRow(channelIndex, row);
+                this.playRow(row);
             }
         });
-        this.frameCallback = null;
+        this.isPlaying = false;
     }
 
-    playRow(channelIndex, rowNumber) {
-        const row = this.model.patterns[channelIndex + 1].rows[rowNumber];
-        const note = row.note;
-        if (note === 0) return;
-        const frequency = notesByNum[note].frequency;
+    playRow(rowNumber) {
+        const instrumentCallbacks = [];
+        for (let chan = 0; chan < 4; chan++) {
+            const row = this.model.patterns[chan + 1].rows[rowNumber];
+            const note = row.note;
+            if (note === 0) {
+                instrumentCallbacks[chan] = null;
+            } else {
+                const frequency = notesByNum[note].frequency;
 
-        const instrumentNumber = row.instrument || this.lastInstrumentNumber;
-        this.lastInstrumentNumber = instrumentNumber;
-        const instrument = this.model.instruments[instrumentNumber];
+                const instrumentNumber = row.instrument || this.lastInstrumentNumber[chan];
+                this.lastInstrumentNumber[chan] = instrumentNumber;
+                const instrument = this.model.instruments[instrumentNumber];
 
-        const instrumentFrameCallback = instrument.getFrameCallback(frequency);
-        this.frameCallback = (frameNumber) => {
-            return [instrumentFrameCallback(frameNumber)];
+                instrumentCallbacks[chan] = instrument.getFrameCallback(frequency);
+            }
+        }
+        const frameCallback = (frameNumber) => {
+            return instrumentCallbacks.map((fn) => fn ? fn(frameNumber) : null);
         };
-        this.audio.play(this.frameCallback);
+        this.isPlaying = true;
+        this.audio.play(frameCallback);
     }
     releaseRow() {
-        if (this.frameCallback) {
+        if (this.isPlaying) {
             this.audio.stop();
-            this.frameCallback = null;
+            this.isPlaying = false;
         }
     }
 

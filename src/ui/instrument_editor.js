@@ -127,7 +127,7 @@ class InstrumentEditor extends Container {
         });
 
         this.audio.on('frame', (frameData) => {
-            this.scope.drawFrame(frameData[0]);
+            if (frameData[0]) this.scope.drawFrame(frameData[0]);
         });
         this.audio.on('stop', () => {
             this.scope.drawAtScrubPosition();

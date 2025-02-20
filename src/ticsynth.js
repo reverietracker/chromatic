@@ -19,7 +19,7 @@ export class TICSynth {
                 ],
                 waveformIsNoise: false,
                 samplesToNextWaveformElement: 0,
-                samplesPerWaveformElement: 0,
+                samplesPerWaveformElement: 1,
                 waveformPtr: 0,
                 level: 0,
             };
