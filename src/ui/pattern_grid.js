@@ -154,7 +154,10 @@ export class PatternGrid extends Component {
         this.lastInstrumentNumber = instrumentNumber;
         const instrument = this.model.instruments[instrumentNumber];
 
-        this.frameCallback = instrument.getFrameCallback(frequency);
+        const instrumentFrameCallback = instrument.getFrameCallback(frequency);
+        this.frameCallback = (frameNumber) => {
+            return [instrumentFrameCallback(frameNumber)];
+        };
         this.audio.play(this.frameCallback);
     }
     releaseRow() {

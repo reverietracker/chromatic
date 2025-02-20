@@ -28,7 +28,7 @@ export class TICSynth {
                     let frameData = this.frameCallback(this.frameNumber);
                     if (this.onFrame) this.onFrame(frameData);
                     this.frameNumber++;
-                    this.waveform = frameData.waveform;
+                    this.waveform = frameData[0].waveform;
                     let waveformIsNoise = true;
                     for (let i = 0; i < 32; i++) {
                         if (this.waveform[i] != 0) {
@@ -37,8 +37,8 @@ export class TICSynth {
                         }
                     }
                     this.waveformIsNoise = waveformIsNoise;
-                    this.volume = frameData.volume;
-                    this.frequency = Math.floor(frameData.frequency);
+                    this.volume = frameData[0].volume;
+                    this.frequency = Math.floor(frameData[0].frequency);
                 } else {
                     this.volume = 0;
                 }

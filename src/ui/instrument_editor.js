@@ -68,7 +68,10 @@ class Key {
     play() {
         currentKey = this;
         this.button.classList.add('active');
-        const frameCallback = this.editor.model.getFrameCallback(this.frequency);
+        const instrumentFrameCallback = this.editor.model.getFrameCallback(this.frequency);
+        const frameCallback = (frameNumber) => {
+            return [instrumentFrameCallback(frameNumber)];
+        }
         this.editor.audio.play(frameCallback);
     }
     release() {
@@ -124,7 +127,7 @@ class InstrumentEditor extends Container {
         });
 
         this.audio.on('frame', (frameData) => {
-            this.scope.drawFrame(frameData);
+            this.scope.drawFrame(frameData[0]);
         });
         this.audio.on('stop', () => {
             this.scope.drawAtScrubPosition();
