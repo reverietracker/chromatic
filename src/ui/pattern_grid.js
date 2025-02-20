@@ -116,6 +116,7 @@ export class PatternGrid extends Component {
         this.audio = audio;
         this.cells = [];
         this.lastInstrumentNumber = [1, 1, 1, 1];
+        this.patternNumbers = [1, 2, 3, 4];
 
         this.channelChangeHandlers = [];
         for (let i = 0; i < 4; i++) {
@@ -127,17 +128,20 @@ export class PatternGrid extends Component {
         this.noteKeyDownHandlers = {};
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (channelIndex, row) => {
-                this.model.patterns[channelIndex + 1].setRow(row, 'note', i);
+                const patternNumber = this.patternNumbers[channelIndex];
+                this.model.patterns[patternNumber].setRow(row, 'note', i);
                 this.playRow(row);
             }
         });
         this.noteKeyDownHandlers['0'] = (channelIndex, row) => {
-            this.model.patterns[channelIndex + 1].setRow(row, 'note', 0);
+            const patternNumber = this.patternNumbers[channelIndex];
+            this.model.patterns[patternNumber].setRow(row, 'note', 0);
         };
         this.instrumentKeyDownHandlers = {};
         '0123456789abcdef'.split('').forEach((key, i) => {
             this.instrumentKeyDownHandlers[key] = (channelIndex, row) => {
-                this.model.patterns[channelIndex + 1].setRow(row, 'instrument', i);
+                const patternNumber = this.patternNumbers[channelIndex];
+                this.model.patterns[patternNumber].setRow(row, 'instrument', i);
                 this.playRow(row);
             }
         });
@@ -147,7 +151,8 @@ export class PatternGrid extends Component {
     playRow(rowNumber) {
         const instrumentCallbacks = [];
         for (let chan = 0; chan < 4; chan++) {
-            const row = this.model.patterns[chan + 1].rows[rowNumber];
+            const patternNumber = this.patternNumbers[chan];
+            const row = this.model.patterns[patternNumber].rows[rowNumber];
             const note = row.note;
             if (note === 0) {
                 instrumentCallbacks[chan] = null;
@@ -203,19 +208,22 @@ export class PatternGrid extends Component {
     trackModel(model) {
         if (this.model) {
             for (let i = 0; i < 4; i++) {
-                this.model.patterns[i + 1].removeListener('changeRow', this.channelChangeHandlers[i]);
+                patternNumber = this.patternNumbers[i];
+                this.model.patterns[patternNumber].removeListener('changeRow', this.channelChangeHandlers[i]);
             }
         }
         super.trackModel(model);
+        this.patternNumbers = [1, 2, 3, 4];
         this.cells = [];
         for (let i = 0; i < 4; i++) {
-            const pattern = this.model.patterns[i + 1];
+            const patternNumber = this.patternNumbers[i];
+            const pattern = this.model.patterns[patternNumber];
             for (let j = 0; j < 64; j++) {
                 const row = pattern.rows[j];
                 this.grid.setCell(j, i * 2, formatNote(row.note));
                 this.grid.setCell(j, i * 2 + 1, formatInstrument(row.instrument));
             }
-            this.model.patterns[i + 1].on('changeRow', this.channelChangeHandlers[i]);
+            pattern.on('changeRow', this.channelChangeHandlers[i]);
         }
     }
 }
