@@ -20,8 +20,7 @@ document.body.appendChild(patternGrid.node);
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
-    patternGrid.song = song;
-    patternGrid.trackModel(song.patterns[1]);
+    patternGrid.trackModel(song);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
