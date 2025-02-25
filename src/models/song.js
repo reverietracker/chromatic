@@ -14,6 +14,15 @@ export class Song extends Model([
         new fields.ModelField('pattern', Pattern),
         {startIndex: 1, length: 63},
     ),
+    new fields.ListField(
+        'positions',
+        new fields.ListField(
+            'position',
+            new fields.IntegerField('pattern', {default: 1}),
+            {length: 4},
+        ),
+        {length: 256},
+    ),
 ]) {
     getLuaCode() {
         return "{\n" + this.instruments.slice(1).map((instrument) => {

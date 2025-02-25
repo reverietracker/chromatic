@@ -116,7 +116,7 @@ export class PatternGrid extends Component {
         this.audio = audio;
         this.cells = [];
         this.lastInstrumentNumber = [1, 1, 1, 1];
-        this.patternNumbers = [1, 2, 3, 4];
+        this.positionNumber = 0;
 
         this.channelChangeHandlers = [];
         for (let i = 0; i < 4; i++) {
@@ -128,19 +128,22 @@ export class PatternGrid extends Component {
         this.noteKeyDownHandlers = {};
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (channelIndex, row) => {
-                const patternNumber = this.patternNumbers[channelIndex];
+                const patternNumbers = this.model.positions[this.positionNumber];
+                const patternNumber = patternNumbers[channelIndex];
                 this.model.patterns[patternNumber].setRow(row, 'note', i);
                 this.playRow(row);
             }
         });
         this.noteKeyDownHandlers['0'] = (channelIndex, row) => {
-            const patternNumber = this.patternNumbers[channelIndex];
+            const patternNumbers = this.model.positions[this.positionNumber];
+            const patternNumber = patternNumbers[channelIndex];
             this.model.patterns[patternNumber].setRow(row, 'note', 0);
         };
         this.instrumentKeyDownHandlers = {};
         '0123456789abcdef'.split('').forEach((key, i) => {
             this.instrumentKeyDownHandlers[key] = (channelIndex, row) => {
-                const patternNumber = this.patternNumbers[channelIndex];
+                const patternNumbers = this.model.positions[this.positionNumber];
+                const patternNumber = patternNumbers[channelIndex];
                 this.model.patterns[patternNumber].setRow(row, 'instrument', i);
                 this.playRow(row);
             }
@@ -151,7 +154,9 @@ export class PatternGrid extends Component {
     playRow(rowNumber) {
         const instrumentCallbacks = [];
         for (let chan = 0; chan < 4; chan++) {
-            const patternNumber = this.patternNumbers[chan];
+            const patternNumbers = this.model.positions[this.positionNumber];
+            const patternNumber = patternNumbers[chan];
+
             const row = this.model.patterns[patternNumber].rows[rowNumber];
             const note = row.note;
             if (note === 0) {
@@ -181,6 +186,18 @@ export class PatternGrid extends Component {
 
     createNode() {
         this.grid = new Grid(8, 64);
+        const tableHeader = this.grid.node.createTHead();
+        const headerRow = tableHeader.insertRow();
+        this.grid.node.insertBefore(<colgroup><col></col></colgroup>, tableHeader);
+        headerRow.insertCell();
+        for (let i = 0; i < 4; i++) {
+            this.grid.node.insertBefore(<colgroup className="channel"><col></col><col></col></colgroup>, tableHeader);
+            const headerCell = headerRow.insertCell();
+            headerCell.colSpan = 2;
+            headerCell.innerText = `${i + 1}`;
+        }
+
+
         this.grid.keyDown = (row, col, e) => {
             const channelIndex = Math.floor(col / 2);
             const channelColumn = col % 2;
@@ -207,16 +224,18 @@ export class PatternGrid extends Component {
     }
     trackModel(model) {
         if (this.model) {
+            const patternNumbers = this.model.positions[this.positionNumber];
             for (let i = 0; i < 4; i++) {
-                patternNumber = this.patternNumbers[i];
+                const patternNumber = patternNumbers[i];
                 this.model.patterns[patternNumber].removeListener('changeRow', this.channelChangeHandlers[i]);
             }
         }
         super.trackModel(model);
-        this.patternNumbers = [1, 2, 3, 4];
+        this.positionNumber = 0;
+        const patternNumbers = this.model.positions[this.positionNumber];
         this.cells = [];
         for (let i = 0; i < 4; i++) {
-            const patternNumber = this.patternNumbers[i];
+            const patternNumber = patternNumbers[i];
             const pattern = this.model.patterns[patternNumber];
             for (let j = 0; j < 64; j++) {
                 const row = pattern.rows[j];

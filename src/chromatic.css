@@ -111,6 +111,10 @@
     position: relative;
     height: 500px;
     overflow-y: auto;
+    border-collapse: collapse;
+}
+.pattern-grid .channel {
+    border-left: 1px double black;
 }
 .pattern-grid td {
     cursor: default;
