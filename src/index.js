@@ -3,7 +3,7 @@ import fileDialog from 'file-dialog';
 
 import "./chromatic.css";
 
-import { AudioController } from "./audio";
+import { AudioController } from "./audio/controller";
 import { Song } from "./models/song";
 import { InstrumentPanel } from "./ui/instrument_editor";
 import { PatternGrid } from './ui/pattern_grid';
