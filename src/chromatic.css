@@ -7,6 +7,8 @@
     position: absolute;
     left: -400px;
     z-index: 100;
+    background-color: #ddd;
+    padding: 8px;
 }
 
 .instrument-panel label {
