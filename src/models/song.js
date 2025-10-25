@@ -12,15 +12,11 @@ export class Song extends Model([
     new fields.ListField(
         'patterns',
         new fields.ModelField('pattern', Pattern),
-        {startIndex: 1, length: 63},
+        {startIndex: 0, length: 64},
     ),
     new fields.ListField(
         'positions',
-        new fields.ListField(
-            'position',
-            new fields.IntegerField('pattern', {default: 1}),
-            {length: 4},
-        ),
+        new fields.IntegerField('pattern', {default: 1}),
         {length: 256},
     ),
 ]) {

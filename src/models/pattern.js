@@ -1,6 +1,6 @@
 import { Model, fields } from 'catwalk';
 
-export class Pattern extends Model([
+export class Channel extends Model([
     new fields.ListField(
         'rows',
         new fields.StructField('row', [
@@ -10,4 +10,13 @@ export class Pattern extends Model([
         {length: 64},
     ),
 ]) {
-};
+}
+
+export class Pattern extends Model([
+    new fields.ListField(
+        'channels',
+        new fields.ModelField('channel', Channel),
+        {length: 4},
+    ),
+]) {
+}
