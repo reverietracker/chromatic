@@ -68,11 +68,7 @@ class Key {
     play() {
         currentKey = this;
         this.button.classList.add('active');
-        const instrumentFrameCallback = this.editor.model.getFrameCallback(this.frequency);
-        const frameCallback = (frameNumber) => {
-            return [instrumentFrameCallback(frameNumber)];
-        }
-        this.editor.audio.play(frameCallback);
+        this.editor.audio.playInstrument(this.editor.model, this.frequency);
     }
     release() {
         this.button.classList.remove('active');

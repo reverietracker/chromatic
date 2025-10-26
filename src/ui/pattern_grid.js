@@ -1,5 +1,5 @@
 import { Component } from 'catwalk-ui';
-import { NOTE_NAMES } from '../defs';
+import { NOTES_BY_NUM } from '../defs';
 
 class Grid {
     constructor(columnCount, rowCount) {
@@ -90,20 +90,8 @@ class Grid {
     }
 }
 
-const notesByNum = {};
-for (let oct = 1; oct < 4; oct++) {
-    for (let n = 0; n < 12; n++) {
-        const noteVal = (oct*12 + n) - 11;
-        const noteName = (NOTE_NAMES[n] + '-').substring(0, 2) + oct;
-        notesByNum[noteVal] = {
-            name: noteName,
-            frequency: 440 * 2**((noteVal-22)/12),
-        };
-    }
-}
-
 const formatNote = (note) => {
-    return note === 0 ? '---' : notesByNum[note].name;
+    return note === 0 ? '---' : NOTES_BY_NUM[note].name;
 }
 const formatInstrument = (val) => {
     return val.toString(16).toUpperCase();
@@ -115,7 +103,6 @@ export class PatternGrid extends Component {
 
         this.audio = audio;
         this.cells = [];
-        this.lastInstrumentNumber = [1, 1, 1, 1];
         this.patternNumber = 0;
 
         this.channelChangeHandlers = [];
@@ -149,28 +136,8 @@ export class PatternGrid extends Component {
     }
 
     playRow(rowNumber) {
-        const instrumentCallbacks = [];
-        const pattern = this.model.patterns[this.patternNumber];
-        for (let chan = 0; chan < 4; chan++) {
-            const row = pattern.channels[chan].rows[rowNumber];
-            const note = row.note;
-            if (note === 0) {
-                instrumentCallbacks[chan] = null;
-            } else {
-                const frequency = notesByNum[note].frequency;
-
-                const instrumentNumber = row.instrument || this.lastInstrumentNumber[chan];
-                this.lastInstrumentNumber[chan] = instrumentNumber;
-                const instrument = this.model.instruments[instrumentNumber];
-
-                instrumentCallbacks[chan] = instrument.getFrameCallback(frequency);
-            }
-        }
-        const frameCallback = (frameNumber) => {
-            return instrumentCallbacks.map((fn) => fn ? fn(frameNumber) : null);
-        };
         this.isPlaying = true;
-        this.audio.play(frameCallback);
+        this.audio.playRow(this.patternNumber, rowNumber);
     }
     releaseRow() {
         if (this.isPlaying) {

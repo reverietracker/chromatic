@@ -21,6 +21,7 @@ const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
     patternGrid.trackModel(song);
+    audio.song = song;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
