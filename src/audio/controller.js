@@ -49,10 +49,9 @@ export class AudioController extends EventEmitter {
         }
         this.play(frameCallback);
     }
-    playRow(patternNumber, rowNumber) {
+    playRow(pattern, rowNumber) {
         if (!this.song) return;
         const instrumentCallbacks = [];
-        const pattern = this.song.patterns[patternNumber];
         for (let chan = 0; chan < 4; chan++) {
             const row = pattern.channels[chan].rows[rowNumber];
             const note = row.note;
