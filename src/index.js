@@ -7,6 +7,7 @@ import { AudioController } from "./audio/controller";
 import { Song } from "./models/song";
 import { InstrumentPanel } from "./ui/instrument_editor";
 import { PatternGrid } from './ui/pattern_grid';
+import { SongEditor } from './ui/song_editor';
 
 const audio = new AudioController();
 
@@ -14,12 +15,15 @@ let song;
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
+const songEditor = new SongEditor(audio);
+document.body.appendChild(songEditor.node);
 const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);
 
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
+    songEditor.trackModel(song);
     patternGrid.trackModel(song.patterns[0]);
     audio.song = song;
 }
