@@ -97,6 +97,29 @@ export class AudioController extends EventEmitter {
         };
         this.play(frameCallback);
     }
+    playPattern(pattern) {
+        let rowNumber = 0;
+        let rowFrameNumber = 0;
+        this.clearChannelStates();
+        const frameCallback = () => {
+            if (rowFrameNumber === 0) {
+                this.readRow(pattern, rowNumber);
+            }
+            rowFrameNumber++;
+            if (rowFrameNumber >= this.song.speed) {
+                rowFrameNumber = 0;
+                rowNumber++;
+                if (rowNumber >= 64) {
+                    rowNumber = 0;
+                }
+            }
+            return this.channelStates.map((state) => (
+                state.instrumentCallback ?
+                state.instrumentCallback(state.instrumentFrame++) : null
+            ));
+        };
+        this.play(frameCallback);
+    }
     setVolume(vol) {
         this.volume = vol;
         if (this.gainNode) this.gainNode.gain.value = vol;

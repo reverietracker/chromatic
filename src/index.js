@@ -66,5 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
         instrumentEditorContainer.style.display = 'none';
     });
 
+    const playPatternButton = document.getElementById("play-pattern");
+    playPatternButton.addEventListener('click', () => {
+        audio.playPattern(song.patterns[0]);
+    });
+
     openSong(new Song());
 });
