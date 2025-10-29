@@ -10,9 +10,24 @@ export class AudioController extends EventEmitter {
         this.gainNode = null;
         this.volume = 0.3;
         this.song = null;
+        this.channelStates = [];
+        for (let i = 0; i < 4; i++) {
+            this.channelStates[i] = {
+                instrumentNumber: 1,
+                instrumentCallback: null,
+                instrumentFrame: 0,
+            };
+        }
         this.lastInstrumentNumber = [1, 1, 1, 1];
     }
     play(frameCallback) {
+        /* Start playback of TIC audio. The frameCallback function will
+         * be called for each frame with the frame number as its argument,
+         * and should return an array of 4 channel data objects. Each channel
+         * data object should have 'waveform' (array of 32 volume values),
+         * 'volume' (0-15), and 'frequency' (in Hz) properties. If a channel
+         * data object is null, that channel will be silent.
+         */
         if (!this.audioStarted) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             const audioContext = new AudioContext({latencyHint: 'interactive'});
@@ -49,26 +64,36 @@ export class AudioController extends EventEmitter {
         }
         this.play(frameCallback);
     }
-    playRow(pattern, rowNumber) {
+    clearChannelStates() {
+        for (let i = 0; i < 4; i++) {
+            this.channelStates[i].instrumentCallback = null;
+            this.channelStates[i].instrumentFrame = 0;
+        }
+    }
+    readRow(pattern, rowNumber) {
         if (!this.song) return;
-        const instrumentCallbacks = [];
         for (let chan = 0; chan < 4; chan++) {
             const row = pattern.channels[chan].rows[rowNumber];
             const note = row.note;
-            if (note === 0) {
-                instrumentCallbacks[chan] = null;
-            } else {
+            if (note !== 0) {
                 const frequency = NOTES_BY_NUM[note].frequency;
-
-                const instrumentNumber = row.instrument || this.lastInstrumentNumber[chan];
-                this.lastInstrumentNumber[chan] = instrumentNumber;
-                const instrument = this.song.instruments[instrumentNumber];
-
-                instrumentCallbacks[chan] = instrument.getFrameCallback(frequency);
+                if (row.instrument) {
+                    this.channelStates[chan].instrumentNumber = row.instrument;
+                }
+                const instrument = this.song.instruments[this.channelStates[chan].instrumentNumber];
+                this.channelStates[chan].instrumentCallback = instrument.getFrameCallback(frequency);
+                this.channelStates[chan].instrumentFrame = 0;
             }
         }
-        const frameCallback = (frameNumber) => {
-            return instrumentCallbacks.map((fn) => fn ? fn(frameNumber) : null);
+    }
+    playRow(pattern, rowNumber) {
+        this.clearChannelStates();
+        this.readRow(pattern, rowNumber);
+        const frameCallback = () => {
+            return this.channelStates.map((state) => (
+                state.instrumentCallback ?
+                state.instrumentCallback(state.instrumentFrame++) : null
+            ));
         };
         this.play(frameCallback);
     }
