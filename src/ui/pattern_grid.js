@@ -7,12 +7,14 @@ class Grid {
         this.rowCount = rowCount;
         this.keyDown = null;
         this.keyUp = null;
+        this.activeRowIndex = null;
 
         this.node = (
             <table className="pattern-grid">
             </table>
         );
         this.cells = [];
+        this.rows = [];
         for (let i = 0; i < rowCount; i++) {
             const rowCells = [];
             for (let j = 0; j < columnCount; j++) {
@@ -34,6 +36,7 @@ class Grid {
                     <td class="row-number">{i}</td>
                 </tr>
             );
+            this.rows.push(rowNode);
             rowCells.forEach((cell) => {
                 rowNode.appendChild(cell);
             });
@@ -87,6 +90,16 @@ class Grid {
 
     setCell(row, col, value) {
         this.cells[row][col].innerText = value;
+    }
+
+    setActiveRow(row) {
+        if (this.activeRowIndex !== null) {
+            this.rows[this.activeRowIndex].classList.remove('active-row');
+        }
+        if (row !== null) {
+            this.rows[row].classList.add('active-row');
+        }
+        this.activeRowIndex = row;
     }
 }
 
@@ -169,6 +182,13 @@ export class PatternGrid extends Component {
             /* TODO: only call releaseRow if the key is actually one that triggered a note */
             this.releaseRow();
         }
+
+        this.audio.on('row', (rowNumber) => {
+            this.grid.setActiveRow(rowNumber);
+        });
+        this.audio.on('stop', () => {
+            this.grid.setActiveRow(null);
+        });
 
         return this.grid.node;
     }

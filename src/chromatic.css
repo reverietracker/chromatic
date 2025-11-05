@@ -118,6 +118,9 @@
 .pattern-grid .channel {
     border-left: 1px double black;
 }
+.pattern-grid tr.active-row {
+    background-color: #dddd00;
+}
 .pattern-grid td {
     cursor: default;
 }
