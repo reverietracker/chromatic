@@ -128,7 +128,7 @@ export class PatternGrid extends Component {
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (channelIndex, row) => {
                 this.model.channels[channelIndex].setRow(row, 'note', i);
-                this.playRow(row);
+                if (!this.audio.isPlaying) this.playRow(row);
             }
         });
         this.noteKeyDownHandlers['0'] = (channelIndex, row) => {
@@ -138,20 +138,20 @@ export class PatternGrid extends Component {
         '0123456789abcdef'.split('').forEach((key, i) => {
             this.instrumentKeyDownHandlers[key] = (channelIndex, row) => {
                 this.model.channels[channelIndex].setRow(row, 'instrument', i);
-                this.playRow(row);
+                if (!this.audio.isPlaying) this.playRow(row);
             }
         });
-        this.isPlaying = false;
+        this.isPlayingRow = false;
     }
 
     playRow(rowNumber) {
-        this.isPlaying = true;
+        this.isPlayingRow = true;
         this.audio.playRow(this.model, rowNumber);
     }
     releaseRow() {
-        if (this.isPlaying) {
+        if (this.isPlayingRow) {
             this.audio.stop();
-            this.isPlaying = false;
+            this.isPlayingRow = false;
         }
     }
 

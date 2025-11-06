@@ -11,6 +11,11 @@ export class AudioController extends EventEmitter {
         this.volume = 0.3;
         this.song = null;
         this.channelStates = [];
+
+        // true if we are currently playing a pattern or whole song
+        // (not just a single row or instrument)
+        this.isPlaying = false;
+
         for (let i = 0; i < 4; i++) {
             this.channelStates[i] = {
                 instrumentNumber: 1,
@@ -55,6 +60,7 @@ export class AudioController extends EventEmitter {
     }
     stop() {
         this.ticSynth.frameCallback = null;
+        this.isPlaying = false;
         this.emit('stop');
     }
     playInstrument(instrument, frequency) {
@@ -119,6 +125,7 @@ export class AudioController extends EventEmitter {
                 state.instrumentCallback(state.instrumentFrame++) : null
             ));
         };
+        this.isPlaying = true;
         this.play(frameCallback);
     }
     setVolume(vol) {
