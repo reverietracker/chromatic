@@ -71,5 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.playPattern(song.patterns[0]);
     });
 
+    const stopButton = document.getElementById("stop");
+    stopButton.addEventListener('click', () => {
+        audio.stop();
+    });
+
     openSong(new Song());
 });
