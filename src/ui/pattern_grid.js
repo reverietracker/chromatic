@@ -1,5 +1,5 @@
 import { Component } from 'catwalk-ui';
-import { NOTES_BY_NUM } from '../defs';
+import { NOTES_BY_NUM, MAX_NOTE_NUM } from '../defs';
 
 class Grid {
     constructor(columnCount, rowCount) {
@@ -115,6 +115,7 @@ export class PatternGrid extends Component {
         super();
 
         this.audio = audio;
+        this.editorState = null;
         this.cells = [];
 
         this.channelChangeHandlers = [];
@@ -127,7 +128,9 @@ export class PatternGrid extends Component {
         this.noteKeyDownHandlers = {};
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
             this.noteKeyDownHandlers[key] = (channelIndex, row) => {
-                this.model.channels[channelIndex].setRow(row, 'note', i);
+                const noteVal = i + (this.editorState.octave - 1) * 12;
+                if (noteVal > MAX_NOTE_NUM) return;
+                this.model.channels[channelIndex].setRow(row, 'note', noteVal);
                 if (!this.audio.isPlaying) this.playRow(row);
             }
         });
@@ -142,6 +145,10 @@ export class PatternGrid extends Component {
             }
         });
         this.isPlayingRow = false;
+    }
+
+    trackEditorState(editorState) {
+        this.editorState = editorState;
     }
 
     playRow(rowNumber) {

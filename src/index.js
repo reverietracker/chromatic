@@ -4,6 +4,7 @@ import fileDialog from 'file-dialog';
 import "./chromatic.css";
 
 import { AudioController } from "./audio/controller";
+import { EditorState } from "./models/editor_state";
 import { Song } from "./models/song";
 import { InstrumentPanel } from "./ui/instrument_editor";
 import { PatternGrid } from './ui/pattern_grid';
@@ -12,13 +13,17 @@ import { SongEditor } from './ui/song_editor';
 const audio = new AudioController();
 
 let song;
+const editorState = new EditorState();
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
 const songEditor = new SongEditor(audio);
 document.body.appendChild(songEditor.node);
+songEditor.trackEditorState(editorState);
+
 const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);
+patternGrid.trackEditorState(editorState);
 
 const openSong = (newSong) => {
     song = newSong;
