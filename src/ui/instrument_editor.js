@@ -2,7 +2,7 @@ import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, Sel
 
 import { Wave, waveType } from "../models/instruments";
 import { Scope } from "./scope";
-import { NOTE_NAMES } from "../defs";
+import { NOTE_NAMES, NOTES_BY_NUM, OCTAVE_COUNT } from "../defs";
 
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 
@@ -48,9 +48,9 @@ let currentKey = null;
 class Key {
     constructor(container, oct, n, editor){
         this.editor = editor;
-        const noteVal = (oct*12 + n) - 33;
+        const noteVal = (oct*12 + n) - 11;
         const noteName = NOTE_NAMES[n] + oct;
-        this.frequency = 440 * 2**(noteVal/12);
+        this.frequency = NOTES_BY_NUM[noteVal].frequency;
         this.button = document.createElement('button');
         this.button.className = 'key';
         if ([1, 3, 6, 8, 10].includes(n)) {
@@ -170,7 +170,7 @@ class InstrumentEditor extends Container {
         );
         const keyboard = node.querySelector("#keyboard");
 
-        for (let oct=1; oct<4; oct++) {
+        for (let oct=1; oct<=OCTAVE_COUNT; oct++) {
             for (let n=0; n<12; n++) {
                 new Key(keyboard, oct, n, this);
             }

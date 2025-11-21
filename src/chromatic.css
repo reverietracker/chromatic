@@ -71,6 +71,7 @@
 #keyboard {
     position: relative;
     height: 100px;
+    overflow-x: scroll;
 }
 .key {
     position: absolute;
