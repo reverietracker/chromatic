@@ -71,7 +71,7 @@ export class TICSynth {
 
             for (let chan = 0; chan < 4; chan++) {
                 const channel = this.channels[chan];
-                if (channel.samplesToNextWaveformElement <= 0) {
+                while (channel.samplesToNextWaveformElement <= 0) {
                     if (channel.waveformIsNoise) {
                         channel.level = Math.random() >= 0.5 ? 15 : 0;
                     } else {

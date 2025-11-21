@@ -9,7 +9,7 @@ for (let oct = 1; oct <= OCTAVE_COUNT; oct++) {
         const noteName = (NOTE_NAMES[n] + '-').substring(0, 2) + oct;
         NOTES_BY_NUM[noteVal] = {
             name: noteName,
-            frequency: 440 * 2**((noteVal-46)/12),
+            frequency: 440 * 2**((noteVal-58)/12),
         };
         NOTE_NUMS_BY_NAME[noteName] = noteVal;
     }
