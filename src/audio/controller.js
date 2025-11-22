@@ -23,7 +23,6 @@ export class AudioController extends EventEmitter {
                 instrumentFrame: 0,
             };
         }
-        this.lastInstrumentNumber = [1, 1, 1, 1];
     }
     play(frameCallback) {
         /* Start playback of TIC audio. The frameCallback function will
