@@ -19,11 +19,19 @@ end
 
 row_frame=0
 row_num=0
-pattern_num=1
+position_num=0
+pattern_num=0
 
-function read_row(pat,row)
+function fetch_position()
+ pattern_num=positions[position_num+1]
+ row_num=0
+end
+
+fetch_position()
+
+function read_row()
  for c=0,3 do
-  note=patterns[pat][c+1][row+1]
+  note=patterns[pattern_num][c+1][row_num+1]
   note_num=note[1]
   if note_num~=0 then
    chan=chan_states[c]
@@ -35,12 +43,16 @@ function read_row(pat,row)
    chan.nfreq=note_freqs[note_num]
   end
  end
+ row_num=row_num+1
+ if row_num==64 then
+  position_num=(position_num+1)%(#positions)
+  fetch_position()
+ end
 end
 
 function music_frame()
  if row_frame==0 then
-  read_row(pattern_num,row_num)
-  row_num=(row_num+1)%64
+  read_row()
  end
  row_frame=(row_frame+1)%song_speed
  for c=0,3 do
