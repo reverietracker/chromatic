@@ -10,6 +10,8 @@
     position: absolute;
     left: -400px;
     z-index: 100;
+    background-color: #ddd;
+    padding: 8px;
 }
 
 .instrument-panel label {
@@ -72,6 +74,7 @@
 #keyboard {
     position: relative;
     height: 100px;
+    overflow-x: scroll;
 }
 .key {
     position: absolute;
@@ -118,6 +121,9 @@
 }
 .pattern-grid .channel {
     border-left: 1px double black;
+}
+.pattern-grid tr.active-row {
+    background-color: #dddd00;
 }
 .pattern-grid td {
     cursor: default;
