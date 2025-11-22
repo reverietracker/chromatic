@@ -272,8 +272,8 @@ return `function (c,v,f,t)
   -- ${this.name}
   local a=0xff9c+c*18
 ${modifierStatements.join('\n')}
-  poke(a,f&255)
-  poke(a+1,(v<<4)+(f>>8))
+  poke(a,f//1&255)
+  poke(a+1,(v<<4)+(f//1>>8))
   for i=0,31 do
 ${waveStatements.join('\n')}
   end

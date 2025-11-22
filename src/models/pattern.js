@@ -50,6 +50,12 @@ export class Channel extends Model([
         {length: 64},
     ),
 ]) {
+    getLuaData() {
+        const rowData = this.rows.map((row) => {
+            return `{${row.note},${row.instrument}}`;
+        }).join(",");
+        return `  {${rowData}}`;
+    }
 }
 
 export class Pattern extends Model([
@@ -59,4 +65,12 @@ export class Pattern extends Model([
         {length: 4},
     ),
 ]) {
+    getLuaData() {
+        const channelsData = this.channels.map((channel) => {
+            return channel.getLuaData();
+        }).join(",\n");
+        return ` {
+${channelsData}
+ }`;
+    }
 }

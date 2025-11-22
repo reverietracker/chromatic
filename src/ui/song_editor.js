@@ -5,6 +5,7 @@ import { EditorState } from "../models/editor_state";
 export class SongEditor extends Container {
     static components = {
         speedInput: NumberInput.forField(Song.fields.speed),
+        lengthInput: NumberInput.forField(Song.fields.length),
     }
     constructor(props) {
         super(props);
@@ -20,6 +21,7 @@ export class SongEditor extends Container {
         return (
             <div class="section">
                 {this.speedInput.labelNode} {this.speedInput}
+                {this.lengthInput.labelNode} {this.lengthInput}
                 {this.octaveInput.labelNode} {this.octaveInput}
             </div>
         );
