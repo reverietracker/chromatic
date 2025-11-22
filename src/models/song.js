@@ -89,28 +89,51 @@ export class Song extends Model([
     new fields.IntegerField('speed', {default: 6, min: 1, max: 31}),
     new fields.IntegerField('length', {default: 1, min: 1, max: 256}),
 ]) {
-    getLuaCode() {
-        const positions = this.positions.slice(0, this.length);
-        /* Remap pattern numbers so that we're only exporting the ones that
-        appear in the positions list */
-        const patternMap = {};
-        const exportedPatterns = [];
-        let nextLuaPatternNumber = 1;
-        for (let i = 0; i < positions.length; i++) {
-            const patternNumber = positions[i];
-            if (patternMap[patternNumber] === undefined) {
-                patternMap[patternNumber] = nextLuaPatternNumber;
-                exportedPatterns.push(this.patterns[patternNumber]);
-                nextLuaPatternNumber++;
-            }
-            positions[i] = patternMap[patternNumber];
+    usedPatterns() {
+        /* Return a Set of pattern numbers used in this song */
+        const patterns = new Set();
+        for (let i = 0; i < this.length; i++) {
+            patterns.add(this.positions[i]);
         }
+        return patterns;
+    }
+    usedInstruments() {
+        /* Return a Set of instrument numbers used in this song */
+        const instruments = new Set();
+        for (const patternNumber of this.usedPatterns()) {
+            const pattern = this.patterns[patternNumber];
+            for (const inst of pattern.usedInstruments()) {
+                instruments.add(inst);
+            };
+        }
+        return instruments;
+    }
+    getLuaCode() {
+        const exportedPatterns = [];
+        const patternMap = {};  // mapping of original pattern number to 1-indexed position in exportedPatterns
+        for (const patternNumber of this.usedPatterns()) {
+            exportedPatterns.push(this.patterns[patternNumber]);
+            patternMap[patternNumber] = exportedPatterns.length;
+        }
+
+        const positions = this.positions.slice(0, this.length);
+        for (let i = 0; i < positions.length; i++) {
+            positions[i] = patternMap[positions[i]];
+        }
+
+        const exportedInstruments = [];
+        const instrumentsMap = {};  // mapping of original instrument number to 1-indexed position in exportedInstruments
+        for (const instrumentNumber of this.usedInstruments()) {
+            exportedInstruments.push(this.instruments[instrumentNumber]);
+            instrumentsMap[instrumentNumber] = exportedInstruments.length;
+        }
+
         const patternsData = exportedPatterns.map((pattern) => {
-            return pattern.getLuaData();
+            return pattern.getLuaData(instrumentsMap);
         }).join(",\n");
 
         const instrumentsCode = (
-            this.instruments.slice(1).map((instrument) => {
+            exportedInstruments.map((instrument) => {
                 return instrument.getLuaCode();
             }).join(",\n")
         );
