@@ -66,6 +66,26 @@ export class Channel extends Model([
         }
         return instruments;
     }
+    isEmpty() {
+        for (const row of this.rows) {
+            if (row.note !== 0 || row.instrument !== 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    toData() {
+        if (this.isEmpty()) {
+            return null;
+        }
+        return super.toData();
+    }
+    static fromData(data) {
+        if (data === null) {
+            return new this();
+        }
+        return super.fromData(data);
+    }
 }
 
 export class Pattern extends Model([
@@ -92,5 +112,25 @@ ${channelsData}
             }
         }
         return instruments;
+    }
+    isEmpty() {
+        for (const channel of this.channels) {
+            if (!channel.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    toData() {
+        if (this.isEmpty()) {
+            return null;
+        }
+        return super.toData();
+    }
+    static fromData(data) {
+        if (data === null) {
+            return new this();
+        }
+        return super.fromData(data);
     }
 }
