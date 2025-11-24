@@ -2,9 +2,7 @@ import { Model, fields } from 'catwalk';
 
 import { Wave } from "./instruments";
 import { Pattern } from "./pattern";
-
-const PATTERN_COUNT = 64;
-const INSTRUMENT_COUNT = 15;
+import { PATTERN_COUNT, INSTRUMENT_COUNT } from '../defs';
 
 const PLAYER_CODE = `
 note_freqs={}

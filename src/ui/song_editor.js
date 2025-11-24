@@ -10,12 +10,15 @@ export class SongEditor extends Container {
     constructor(props) {
         super(props);
         const OctaveInput = NumberInput.forField(EditorState.fields.octave);
+        const PatternInput = NumberInput.forField(EditorState.fields.pattern);
         this.octaveInput = new OctaveInput();
+        this.patternInput = new PatternInput();
         this.editorState = null;
     }
     trackEditorState(editorState) {
         this.editorState = editorState;
         this.octaveInput.trackModel(editorState);
+        this.patternInput.trackModel(editorState);
     }
     createNode() {
         return (
@@ -23,6 +26,7 @@ export class SongEditor extends Container {
                 {this.speedInput.labelNode} {this.speedInput}
                 {this.lengthInput.labelNode} {this.lengthInput}
                 {this.octaveInput.labelNode} {this.octaveInput}
+                {this.patternInput.labelNode} {this.patternInput}
             </div>
         );
     }

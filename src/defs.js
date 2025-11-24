@@ -15,3 +15,6 @@ for (let oct = 1; oct <= OCTAVE_COUNT; oct++) {
     }
 }
 export const MAX_NOTE_NUM = OCTAVE_COUNT * 12;
+
+export const PATTERN_COUNT = 64;
+export const INSTRUMENT_COUNT = 15;

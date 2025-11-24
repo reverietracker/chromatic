@@ -24,13 +24,19 @@ songEditor.trackEditorState(editorState);
 const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);
 patternGrid.trackEditorState(editorState);
+editorState.on("changePattern", (patternIndex) => {
+    if (song) {
+        patternGrid.trackModel(song.patterns[patternIndex]);
+    }
+});
 
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
     songEditor.trackModel(song);
-    patternGrid.trackModel(song.patterns[0]);
     audio.song = song;
+    editorState.pattern = 0;
+    patternGrid.trackModel(song.patterns[editorState.pattern]);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playPatternButton = document.getElementById("play-pattern");
     playPatternButton.addEventListener('click', () => {
-        audio.playPattern(song.patterns[0]);
+        audio.playPattern(song.patterns[editorState.pattern]);
     });
 
     const stopButton = document.getElementById("stop");
