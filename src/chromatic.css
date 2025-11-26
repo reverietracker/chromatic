@@ -132,3 +132,21 @@
 .pattern-grid .row-number {
     color: #444;
 }
+.position-list {
+    padding: 0;
+    width: 100%;
+    overflow-x: scroll;
+}
+.position-list li {
+    display: inline;
+    font-family: monospace;
+    padding: 8px 8px;
+    border-left: 1px solid black;
+    cursor: default;
+}
+.position-list li:focus {
+    background-color: #ffff88;
+}
+.position-list li.disabled {
+    color: #aaa;
+}

@@ -81,7 +81,7 @@ export class Song extends Model([
     ),
     new fields.ListField(
         'positions',
-        new fields.IntegerField('pattern', {default: 0, min: 0, max: PATTERN_COUNT - 1}),
+        new fields.IntegerField('position', {default: 0, min: 0, max: PATTERN_COUNT - 1}),
         {length: 256},
     ),
     new fields.IntegerField('speed', {default: 6, min: 1, max: 31}),
