@@ -135,18 +135,20 @@
 .position-list {
     padding: 0;
     width: 100%;
+    white-space: nowrap;
     overflow-x: scroll;
 }
-.position-list li {
-    display: inline;
+.position-list button {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    display: inline-block;
     font-family: monospace;
-    padding: 8px 8px;
-    border-left: 1px solid black;
-    cursor: default;
+    padding: 4px 4px;
+    width: 3em;
 }
-.position-list li:focus {
+.position-list button:focus {
     background-color: #ffff88;
 }
-.position-list li.disabled {
+.position-list button.disabled {
     color: #aaa;
 }

@@ -21,10 +21,11 @@ export class PositionList extends Component {
             const li = this.node.children[index];
             li.innerText = newValue;
         };
+        this.editorState = null;
     }
     createNode() {
         return (
-            <ul class="position-list"></ul>
+            <div class="position-list"></div>
         );
     }
     trackModel(model) {
@@ -38,20 +39,29 @@ export class PositionList extends Component {
         this.model.on("changeLength", this.changeLengthHandler);
         this.model.on("changePosition", this.changePositionHandler);
         for (let i = 0; i < model.positions.length; i++) {
-            const li = document.createElement('li');
-            li.tabIndex = 0;
+            const button = document.createElement('button');
+            button.tabIndex = 0;
             if (i >= model.length) {
-                li.classList.add('disabled');
+                button.classList.add('disabled');
             }
-            li.innerText = model.positions[i];
-            this.node.appendChild(li);
-            li.addEventListener('keydown', (e) => {
+            button.innerText = model.positions[i];
+            this.node.appendChild(button);
+            button.addEventListener('keydown', (e) => {
                 this.keyDownHandler(i, e);
             });
-            li.addEventListener('focus', (e) => {
+            button.addEventListener('focus', (e) => {
                 this.focusHandler(i, e);
             });
+            button.addEventListener('dblclick', (e) => {
+                if (this.editorState) {
+                    this.editorState.pattern = model.positions[i];
+                }
+                e.preventDefault();
+            });
         }
+    }
+    trackEditorState(editorState) {
+        this.editorState = editorState;
     }
     keyDownHandler(index, e) {
         if (e.key === 'ArrowLeft' && index > 0) {

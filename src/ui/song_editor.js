@@ -21,6 +21,7 @@ export class SongEditor extends Container {
         this.editorState = editorState;
         this.octaveInput.trackModel(editorState);
         this.patternInput.trackModel(editorState);
+        this.positionList.trackEditorState(editorState);
     }
     createNode() {
         return (
