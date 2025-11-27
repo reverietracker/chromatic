@@ -109,7 +109,7 @@ export class AudioController extends EventEmitter {
         const frameCallback = () => {
             if (rowFrameNumber === 0) {
                 this.readRow(pattern, rowNumber);
-                this.emit('row', rowNumber);
+                this.emit('row', rowNumber, pattern);
             }
             rowFrameNumber++;
             if (rowFrameNumber >= this.song.speed) {

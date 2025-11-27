@@ -190,8 +190,12 @@ export class PatternGrid extends Component {
             this.releaseRow();
         }
 
-        this.audio.on('row', (rowNumber) => {
-            this.grid.setActiveRow(rowNumber);
+        this.audio.on('row', (rowNumber, pattern) => {
+            if (this.model === pattern) {
+                this.grid.setActiveRow(rowNumber);
+            } else {
+                this.grid.setActiveRow(null);
+            }
         });
         this.audio.on('stop', () => {
             this.grid.setActiveRow(null);
