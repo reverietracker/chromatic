@@ -127,6 +127,36 @@ export class AudioController extends EventEmitter {
         this.isPlaying = true;
         this.play(frameCallback);
     }
+    playSong(startPosition) {
+        if (!this.song) return;
+        let positionNumber = startPosition;
+        let rowNumber = 0;
+        let rowFrameNumber = 0;
+        this.clearChannelStates();
+        const frameCallback = () => {
+            if (rowFrameNumber === 0) {
+                const patternNumber = this.song.positions[positionNumber];
+                const pattern = this.song.patterns[patternNumber];
+                this.readRow(pattern, rowNumber);
+                this.emit('row', rowNumber, pattern);
+            }
+            rowFrameNumber++;
+            if (rowFrameNumber >= this.song.speed) {
+                rowFrameNumber = 0;
+                rowNumber++;
+                if (rowNumber >= 64) {
+                    rowNumber = 0;
+                    positionNumber = (positionNumber + 1) % this.song.length;
+                }
+            }
+            return this.channelStates.map((state) => (
+                state.instrumentCallback ?
+                state.instrumentCallback(state.instrumentFrame++) : null
+            ));
+        };
+        this.isPlaying = true;
+        this.play(frameCallback);
+    }
     setVolume(vol) {
         this.volume = vol;
         if (this.gainNode) this.gainNode.gain.value = vol;

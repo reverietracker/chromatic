@@ -87,5 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.stop();
     });
 
+    const playAllButton = document.getElementById("play-all");
+    playAllButton.addEventListener('click', () => {
+        audio.playSong(0);
+    });
+
     openSong(new Song());
 });
