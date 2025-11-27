@@ -22,6 +22,23 @@ export class PositionList extends Component {
             li.innerText = newValue;
         };
         this.editorState = null;
+        this.audio = null;
+        this.activePosition = null;
+        this.audioPositionChangeHandler = (position) => {
+            if (this.activePosition !== null) {
+                this.node.children[this.activePosition].classList.remove('active-position');
+            }
+            this.activePosition = position;
+            if (position >= 0 && position < this.node.children.length) {
+                this.node.children[position].classList.add('active-position');
+            }
+        };
+        this.audioStopHandler = () => {
+            if (this.activePosition !== null) {
+                this.node.children[this.activePosition].classList.remove('active-position');
+                this.activePosition = null;
+            }
+        }
     }
     createNode() {
         return (
@@ -62,6 +79,17 @@ export class PositionList extends Component {
     }
     trackEditorState(editorState) {
         this.editorState = editorState;
+    }
+    trackAudio(audio) {
+        if (this.audio) {
+            this.audio.removeListener('position', this.audioPositionChangeHandler);
+            this.audio.removeListener('stop', this.audioStopHandler);
+        }
+        this.audio = audio;
+        if (this.audio) {
+            this.audio.on('position', this.audioPositionChangeHandler);
+            this.audio.on('stop', this.audioStopHandler);
+        }
     }
     keyDownHandler(index, e) {
         if (e.key === 'ArrowLeft' && index > 0) {

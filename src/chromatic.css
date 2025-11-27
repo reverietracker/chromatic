@@ -149,6 +149,9 @@
 .position-list button:focus {
     background-color: #ffff88;
 }
+.position-list button.active-position {
+    background-color: #dddd00;
+}
 .position-list button.disabled {
     color: #aaa;
 }

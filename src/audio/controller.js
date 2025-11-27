@@ -133,6 +133,7 @@ export class AudioController extends EventEmitter {
         let rowNumber = 0;
         let rowFrameNumber = 0;
         this.clearChannelStates();
+        this.emit('position', positionNumber);
         const frameCallback = () => {
             if (rowFrameNumber === 0) {
                 const patternNumber = this.song.positions[positionNumber];
@@ -147,6 +148,7 @@ export class AudioController extends EventEmitter {
                 if (rowNumber >= 64) {
                     rowNumber = 0;
                     positionNumber = (positionNumber + 1) % this.song.length;
+                    this.emit('position', positionNumber);
                 }
             }
             return this.channelStates.map((state) => (

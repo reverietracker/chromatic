@@ -17,9 +17,10 @@ const editorState = new EditorState();
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
-const songEditor = new SongEditor(audio);
+const songEditor = new SongEditor();
 document.body.appendChild(songEditor.node);
 songEditor.trackEditorState(editorState);
+songEditor.trackAudio(audio);
 
 const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);

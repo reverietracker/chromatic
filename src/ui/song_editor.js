@@ -16,12 +16,16 @@ export class SongEditor extends Container {
         this.octaveInput = new OctaveInput();
         this.patternInput = new PatternInput();
         this.editorState = null;
+        console.log(this.options);
     }
     trackEditorState(editorState) {
         this.editorState = editorState;
         this.octaveInput.trackModel(editorState);
         this.patternInput.trackModel(editorState);
         this.positionList.trackEditorState(editorState);
+    }
+    trackAudio(audio) {
+        this.positionList.trackAudio(audio);
     }
     createNode() {
         return (
