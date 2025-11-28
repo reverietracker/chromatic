@@ -23,22 +23,32 @@ export class PositionList extends Component {
         };
         this.editorState = null;
         this.audio = null;
-        this.activePosition = null;
+        this.playingPosition = null;
         this.audioPositionChangeHandler = (position) => {
-            if (this.activePosition !== null) {
-                this.node.children[this.activePosition].classList.remove('active-position');
+            if (this.playingPosition !== null) {
+                this.node.children[this.playingPosition].classList.remove('playing-position');
             }
-            this.activePosition = position;
+            this.playingPosition = position;
             if (position >= 0 && position < this.node.children.length) {
-                this.node.children[position].classList.add('active-position');
+                this.node.children[position].classList.add('playing-position');
             }
         };
         this.audioStopHandler = () => {
-            if (this.activePosition !== null) {
-                this.node.children[this.activePosition].classList.remove('active-position');
-                this.activePosition = null;
+            if (this.playingPosition !== null) {
+                this.node.children[this.playingPosition].classList.remove('playing-position');
+                this.playingPosition = null;
             }
         }
+        this.changeSelectedPositionHandler = (newIndex) => {
+            if (this.node.children[this.selectedPosition]) {
+                this.node.children[this.selectedPosition].classList.remove('selected-position');
+            }
+            this.selectedPosition = newIndex;
+            if (this.node.children[this.selectedPosition]) {
+                this.node.children[this.selectedPosition].classList.add('selected-position');
+            }
+        }
+        this.selectedPosition = null;
     }
     createNode() {
         return (
@@ -68,6 +78,9 @@ export class PositionList extends Component {
             });
             button.addEventListener('focus', (e) => {
                 this.focusHandler(i, e);
+                if (this.editorState) {
+                    this.editorState.selectedPosition = i;
+                }
             });
             button.addEventListener('dblclick', (e) => {
                 if (this.editorState) {
@@ -76,9 +89,16 @@ export class PositionList extends Component {
                 e.preventDefault();
             });
         }
+        if (this.editorState) {
+            this.changeSelectedPositionHandler(this.editorState.selectedPosition);
+        }
     }
     trackEditorState(editorState) {
+        if (this.editorState) {
+            this.editorState.removeListener("changeSelectedPosition", this.changeSelectedPositionHandler);
+        }
         this.editorState = editorState;
+        this.editorState.on("changeSelectedPosition", this.changeSelectedPositionHandler);
     }
     trackAudio(audio) {
         if (this.audio) {

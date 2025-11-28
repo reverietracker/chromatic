@@ -93,5 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.playSong(0);
     });
 
+    const playFromPositionButton = document.getElementById("play-from-position");
+    playFromPositionButton.addEventListener('click', () => {
+        audio.playSong(editorState.selectedPosition);
+    });
+
     openSong(new Song());
 });

@@ -120,7 +120,7 @@
     border-left: 1px double black;
 }
 .pattern-grid tr.active-row {
-    background-color: #dddd00;
+    background-color: #88dd88;
 }
 .pattern-grid td {
     cursor: default;
@@ -146,11 +146,14 @@
     padding: 4px 4px;
     width: 3em;
 }
-.position-list button:focus {
+.position-list button.selected-position {
+    background-color: #dddd88;
+}
+.position-list button.selected-position:focus {
     background-color: #ffff88;
 }
-.position-list button.active-position {
-    background-color: #dddd00;
+.position-list button.playing-position {
+    background-color: #88dd88 !important;  /* takes precedence over selected-position */
 }
 .position-list button.disabled {
     color: #aaa;
