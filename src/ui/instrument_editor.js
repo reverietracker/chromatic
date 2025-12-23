@@ -16,8 +16,9 @@ class PhaseFieldset extends Fieldset.withOptions({legend: "Phase"}) {
 
 class EnvelopeFieldset extends Fieldset.withOptions({legend: "Envelope"}) {
     static components = {
-        decaySpeedInput: NumberInput.forField(Wave.fields.decaySpeed),
+        initialVolumeInput: NumberInput.forField(Wave.fields.initialVolume),
         decayToInput: NumberInput.forField(Wave.fields.decayTo),
+        decaySpeedInput: NumberInput.forField(Wave.fields.decaySpeed),
     }
 }
 

@@ -19,7 +19,8 @@ export class Wave extends Model([
     new fields.ValueField('name', {default: ""}),
     new fields.IntegerField('transpose', {default: 0, min: -24, max: 24}),
     new fields.IntegerField('slideStep', {default: 0, min: -256, max: 256, label: "Pitch slide step"}),
-    new fields.IntegerField('decayTo', {default: 0, min: 0, max: 15, label: "Decay to volume"}),
+    new fields.IntegerField('initialVolume', {default: 15, min: 0, max: 15, label: "Initial volume"}),
+    new fields.IntegerField('decayTo', {default: 0, min: 0, max: 15, label: "Final volume"}),
     new fields.IntegerField('decaySpeed', {default: 16, min: 0, max: 256}),
     new fields.IntegerField('phaseMin', {default: 16, min: 0, max: 32}),
     new fields.IntegerField('phaseMax', {default: 16, min: 0, max: 32}),
@@ -108,9 +109,15 @@ export class Wave extends Model([
                 + frame * this.slideStep / 16
             );
 
+            const volume = Math.round(
+                this.initialVolume >= this.decayTo ?
+                Math.max(this.decayTo, this.initialVolume - (frame * this.decaySpeed / 16)) :
+                Math.min(this.decayTo, this.initialVolume + (frame * this.decaySpeed / 16))
+            );
+
             return {
                 frequency: Math.min(Math.max(1, Math.round(finalFrequency)), 4095),
-                volume: Math.max(this.decayTo, 15 - (frame * this.decaySpeed / 16)),
+                volume: volume,
                 waveform,
             };
         }
@@ -173,7 +180,13 @@ export class Wave extends Model([
             }
 
             if (this.decaySpeed > 0) {
-                modifierStatements.push(`  v=math.max(${this.decayTo}, 15-(t*${this.decaySpeed/16}))*v//15`);
+                if (this.initialVolume >= this.decayTo) {
+                    modifierStatements.push(`  v=math.max(${this.decayTo},${this.initialVolume}-(t*${this.decaySpeed/16}))*v//15`);
+                } else {
+                    modifierStatements.push(`  v=math.min(${this.decayTo},${this.initialVolume}+(t*${this.decaySpeed/16}))*v//15`);
+                }
+            } else if (this.initialVolume != 15) {
+                modifierStatements.push(`  v=${this.initialVolume}*v//15`);
             }
 
             if (this.waveType == waveType.NOISE) {
