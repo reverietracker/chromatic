@@ -42,7 +42,7 @@ function read_row()
   end
  end
  row_num=row_num+1
- if row_num==64 then
+ if row_num==#(patterns[pattern_num][1]) then
   position_num=(position_num+1)%(#positions)
   fetch_position()
  end

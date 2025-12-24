@@ -118,12 +118,28 @@ export class PatternGrid extends Component {
         this.editorState = null;
         this.cells = [];
 
+        this.currentLength = 0;
+
         this.channelChangeHandlers = [];
         for (let i = 0; i < 4; i++) {
             this.channelChangeHandlers[i] = (row, field, value) => {
                 this.changeRowHandler(i, row, field, value);
             }
         };
+
+        this.changeLengthHandler = (newLength) => {
+            if (newLength > this.currentLength) {
+                for (let i = this.currentLength; i < newLength; i++) {
+                    this.grid.rows[i].style.display = '';
+                }
+            } else {
+                for (let i = newLength; i < this.currentLength; i++) {
+                    this.grid.rows[i].style.display = 'none';
+                }
+            }
+            this.currentLength = newLength;
+        }
+
 
         this.noteKeyDownHandlers = {};
         '-zsxdcvgbhnjmq2w3er5t6y7ui'.split('').forEach((key, i) => {
@@ -213,11 +229,13 @@ export class PatternGrid extends Component {
     }
     trackModel(model) {
         if (this.model) {
+            this.model.removeListener("changeLength", this.changeLengthHandler);
             for (let i = 0; i < 4; i++) {
                 this.model.channels[i].removeListener('changeRow', this.channelChangeHandlers[i]);
             }
         }
         super.trackModel(model);
+        this.currentLength = model.length;
         this.cells = [];
         for (let i = 0; i < 4; i++) {
             const channel = this.model.channels[i];
@@ -225,8 +243,14 @@ export class PatternGrid extends Component {
                 const row = channel.rows[j];
                 this.grid.setCell(j, i * 2, formatNote(row.note));
                 this.grid.setCell(j, i * 2 + 1, formatInstrument(row.instrument));
+                if (j >= this.model.length) {
+                    this.grid.rows[j].style.display = 'none';
+                } else {
+                    this.grid.rows[j].style.display = '';
+                }
             }
             channel.on('changeRow', this.channelChangeHandlers[i]);
         }
+        this.model.on("changeLength", this.changeLengthHandler);
     }
 }

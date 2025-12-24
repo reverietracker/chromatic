@@ -50,16 +50,16 @@ export class Channel extends Model([
         {length: 64},
     ),
 ]) {
-    getLuaData(instrumentsMap) {
-        const rowData = this.rows.map((row) => {
+    getLuaData(instrumentsMap, patternLength) {
+        const rowData = this.rows.slice(0, patternLength).map((row) => {
             return `{${row.note},${row.instrument == 0 ? 0 : instrumentsMap[row.instrument]}}`;
         }).join(",");
         return `  {${rowData}}`;
     }
-    usedInstruments() {
+    usedInstruments(patternLength) {
         /* Return a Set of instrument numbers used in this channel */
         const instruments = new Set();
-        for (const row of this.rows) {
+        for (const row of this.rows.slice(0, patternLength)) {
             if (row.instrument !== 0) {
                 instruments.add(row.instrument);
             }
@@ -94,10 +94,11 @@ export class Pattern extends Model([
         new fields.ModelField('channel', Channel),
         {length: 4},
     ),
+    new fields.IntegerField('length', {default: 64, min: 1, max: 64}),
 ]) {
     getLuaData(instrumentsMap) {
         const channelsData = this.channels.map((channel) => {
-            return channel.getLuaData(instrumentsMap);
+            return channel.getLuaData(instrumentsMap, this.length);
         }).join(",\n");
         return ` {
 ${channelsData}
@@ -107,7 +108,7 @@ ${channelsData}
         /* Return a Set of instrument numbers used in this pattern */
         const instruments = new Set();
         for (const channel of this.channels) {
-            for (const inst of channel.usedInstruments()) {
+            for (const inst of channel.usedInstruments(this.length)) {
                 instruments.add(inst);
             }
         }
