@@ -200,7 +200,6 @@ class InstrumentEditor extends Container {
             const instrument = this.model;
             if (!instrument) return;
             fileDialog({accept: '.wav,audio/wav,audio/x-wav'}).then(files => {
-                console.log(files);
                 files[0].arrayBuffer().then(buffer => {
                     instrument.loadSampleFromWavBuffer(buffer);
                 });

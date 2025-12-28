@@ -14,46 +14,39 @@ export class Frame {
 
 export const normalizeWave = (wav) => {
     // convert to an array of mono samples between -1 and 1
-    let samples = [];
-    if (wav.fmt.numChannels == 1) {
-        // mono
-        if (wav.fmt.bitsPerSample == 8) {
-            // 8 bit unsigned
-            for (let i = 0; i < wav.data.samples.length; i++) {
-                const sample = wav.data.samples[i];
-                samples.push((sample - 128) / 128);
+    let rawSamples = wav.getSamples(false);
+    if (wav.fmt.numChannels > 1) {
+        // rawSamples is a list of lists, average the channels
+        for (let i = 0; i < rawSamples[0].length; i++) {
+            let sum = 0;
+            for (let ch = 0; ch < rawSamples.length; ch++) {
+                sum += rawSamples[ch][i];
             }
-        } else if (wav.fmt.bitsPerSample == 16) {
-            // 16 bit signed
-            for (let i = 0; i < wav.data.samples.length; i++) {
-                const sample = wav.data.samples[i];
-                samples.push(sample / 32768);
-            }
-        } else {
-            console.error("unsupported bit depth: " + wav.fmt.bitsPerSample);
+            rawSamples[0][i] = sum / rawSamples.length;
         }
-    } else if (wav.fmt.numChannels == 2) {
-        // stereo - average the two channels
-        if (wav.fmt.bitsPerSample == 8) {
-            // 8 bit unsigned
-            for (let i = 0; i < wav.data.samples.length; i += 2) {
-                const sampleL = wav.data.samples[i];
-                const sampleR = wav.data.samples[i + 1];
-                samples.push(((sampleL - 128) / 128 + (sampleR - 128) / 128) / 2);
-            }
-        } else if (wav.fmt.bitsPerSample == 16) {
-            // 16 bit signed
-            for (let i = 0; i < wav.data.samples.length; i += 2) {
-                const sampleL = wav.data.samples[i];
-                const sampleR = wav.data.samples[i + 1];
-                samples.push((sampleL / 32768 + sampleR / 32768) / 2);
-            }
-        } else {
-            console.error("unsupported bit depth: " + wav.fmt.bitsPerSample);
+        rawSamples = rawSamples[0];
+    }
+    // normalize samples as signed
+    let samples = [];
+    if (wav.fmt.bitsPerSample == 8) {
+        // 8 bit unsigned
+        for (let i = 0; i < rawSamples.length; i++) {
+            const sample = rawSamples[i];
+            samples.push(sample - 128);
+        }
+    } else if (wav.fmt.bitsPerSample == 16) {
+        // 16 bit signed
+        for (let i = 0; i < rawSamples.length; i++) {
+            let sample = rawSamples[i];
+            if (sample > 32767) sample -= 65536;
+            samples.push(sample);
         }
     } else {
-        console.error("unsupported number of channels: " + wav.fmt.numChannels);
+        console.error("unsupported bit depth: " + wav.fmt.bitsPerSample);
     }
+    // normalize to -1 to 1
+    const maxAmplitude = Math.max(...samples.map(Math.abs));
+    samples = samples.map(sample => sample / maxAmplitude);
     return samples;
 }
 
