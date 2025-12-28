@@ -1,4 +1,5 @@
 import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
+import fileDialog from 'file-dialog';
 
 import { Wave, waveType } from "../models/instruments";
 import { Scope } from "./scope";
@@ -98,28 +99,33 @@ class InstrumentEditor extends Container {
         this.scope.scrubControlNode = this.scrubControl.node;
     
         this.trackField(Wave.fields.waveType, (wt) => {
-            if (wt == waveType.NOISE || wt == waveType.SINE || wt == waveType.SAMPLE) {
+            if (wt == waveType.SAMPLE) {
+                this.phaseFieldset.node.style.display = 'none';
+                this.envelopeFieldset.node.style.display = 'none';
+                this.vibratoFieldset.node.style.display = 'none';
+                this.harmonicsPanel.node.style.display = 'none';
+                this.node.querySelector('.transpose-panel').style.display = 'none';
+                this.node.querySelector('.slide-step-panel').style.display = 'none';
+                this.node.querySelector('.import-sample-panel').style.display = '';
+            } else {
+                this.phaseFieldset.node.style.display = '';
+                this.envelopeFieldset.node.style.display = '';
+                this.vibratoFieldset.node.style.display = '';
+                this.harmonicsPanel.node.style.display = '';
+                this.node.querySelector('.transpose-panel').style.display = '';
+                this.node.querySelector('.slide-step-panel').style.display = '';
+                this.node.querySelector('.import-sample-panel').style.display = 'none';
+            }
+            if (wt == waveType.NOISE || wt == waveType.SINE) {
                 this.phaseFieldset.node.setAttribute('disabled', 'true');
             } else {
                 this.phaseFieldset.node.removeAttribute('disabled');
             }
 
-            if (wt == waveType.NOISE || wt == waveType.SAMPLE) {
+            if (wt == waveType.NOISE) {
                 this.harmonicsPanel.node.setAttribute('disabled', 'true');
             } else {
                 this.harmonicsPanel.node.removeAttribute('disabled');
-            }
-
-            if (wt == waveType.SAMPLE) {
-                this.envelopeFieldset.node.setAttribute('disabled', 'true');
-                this.vibratoFieldset.node.setAttribute('disabled', 'true');
-                this.slideStepInput.node.setAttribute('disabled', 'true');
-                this.transposeInput.node.setAttribute('disabled', 'true');
-            } else {
-                this.envelopeFieldset.node.removeAttribute('disabled');
-                this.vibratoFieldset.node.removeAttribute('disabled');
-                this.slideStepInput.node.removeAttribute('disabled');
-                this.transposeInput.node.removeAttribute('disabled');
             }
         });
 
@@ -145,11 +151,14 @@ class InstrumentEditor extends Container {
                             {this.waveTypeInput.labelNode}
                             {this.waveTypeInput}
                         </div>
-                        <div>
+                        <div class="import-sample-panel">
+                            <button id="import-sample-button">Import Sample</button>
+                        </div>
+                        <div class="transpose-panel">
                             {this.transposeInput.labelNode}
                             {this.transposeInput}
                         </div>
-                        <div>
+                        <div class="slide-step-panel">
                             {this.slideStepInput.labelNode}
                             {this.slideStepInput}
                         </div>
@@ -185,6 +194,17 @@ class InstrumentEditor extends Container {
         scrubControl.addEventListener('input', () => {
             this.scope.drawAtScrubPosition();
             scrubValue.innerText = scrubControl.value;
+        });
+
+        node.querySelector('#import-sample-button').addEventListener('click', () => {
+            const instrument = this.model;
+            if (!instrument) return;
+            fileDialog({accept: '.wav,audio/wav,audio/x-wav'}).then(files => {
+                console.log(files);
+                files[0].arrayBuffer().then(buffer => {
+                    instrument.loadSampleFromWavBuffer(buffer);
+                });
+            });
         });
 
         return node;

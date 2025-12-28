@@ -1,4 +1,8 @@
 import { Model, fields } from 'catwalk';
+import { WaveFile } from 'wavefile';
+
+import { normalizeWave, makeFrame } from '../util/sample.js';
+import { MAX_NOTE_NUM } from '../defs.js';
 
 export const waveType = {
     SQUARE: 1,
@@ -14,7 +18,7 @@ export class Wave extends Model([
         [waveType.TRIANGLE, "Triangle"],
         [waveType.SINE, "Sine"],
         [waveType.NOISE, "Noise"],
-        // [waveType.SAMPLE, "Sample"],
+        [waveType.SAMPLE, "Sample"],
     ], default: waveType.SQUARE}),
     new fields.ValueField('name', {default: ""}),
     new fields.IntegerField('transpose', {default: 0, min: -24, max: 24}),
@@ -32,14 +36,47 @@ export class Wave extends Model([
         new fields.NumberField('harmonic', {default: 0, min: 0, max: 1}),
         {length: 8, default: [1, 0, 0, 0, 0, 0, 0, 0]},
     ),
+    new fields.ValueField('sampleWaveforms', {default: []}),
+    new fields.ValueField('sampleVolumes', {default: []}),
+    new fields.ValueField('sampleFrequencies', {default: []}),
+    new fields.IntegerField('sampleRepeatFrom', {default: 0, min: 0}),
+    new fields.IntegerField('sampleRepeatLength', {default: 0, min: 0}),
+    new fields.IntegerField('sampleBaseNote', {default: 27, min: 1, max: MAX_NOTE_NUM}),
 ]) {
-    sampleWaveforms = ['AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'IJOMPPPPMJHEEDFFGHIIIIKKKKHFDFGI', 'JLMPPPPNLJIGFEFEFGGGHJJKKIGGEDEH', 'IKMPPPOMKIIGFGFFGGGHHHJJIHHFEDEH', 'IKNPPPOMKJIGFFFFGFGHHHJJIIGGEEFI', 'JLPPPONLJIGGGFFFFGGGHIIIIGGEDEHI', 'ILOPPONMKIHGGFFFFGGGIIIJIHGEDEFI', 'ILOPPONLKIHHGFFFFGFGIIIJIHGEDEFI', 'JLOPPOOLKIHHFFFFFGFGHIIJIIGEEDFI', 'JMPPPOMLKIHGFGFFFGGGHIJJJIGEDDGI', 'ILOPPPNMKJIGGGFFGFGGGIJJIIGFDDEH', 'IMOPPPNLKJIGGFFFFFGGGIJJJHGEDDEH', 'IMOPPONMKJIHGFFFFGFGHIJJIHGEDCEI', 'JLPPPONLKJIHGFFFFFFGHIJJIHGEDCEI', 'IMOPPPNLKJIHGFFFFFFGHIJJJIHEDCEI', 'JMPPPONLKJIHGFFFGGFFHIJJIIHEDCEI', 'IMPPPONLKJIHGGFFGFFFHJJJIIGFCDEI', 'IMOPPONLLJIIGGFFFFFFHIJJJIGEDCEI', 'JMOPPONLKJJHGGFFFFEFHJJJJIGECCFI', 'JMOPPONLKJIHHFFGGEEFHJJJJIGECCFI', 'IMOPPOMMLJJIHFFFGFEFHJJJJIGECCEH', 'JLNPPNNMKJJIGFFGFEEFIIIJJIGEBCFI', 'JLNPPONLLKJIHGGGFEDFIIIJIIHECDFI', 'JLNPOONMLKJIHGGGFEDFHIJJJIGEDCEI', 'ILOPPONMLKKIHGGGFDDFHIIJJIGECCEI', 'ILOOPONMLKKJHGGGFDDFHIIJJIGEDCEH', 'IMNPPONMLLKIGGGGEDDFHIIJJIGECCFH', 'JLOPONNMLLKIHGHGEDEFHIIJJHFDCEFI', 'ILOPPONMMLKJHGHGDCDFGHIJJIGDCDEI', 'JMOPOONMMLKJHHHFDDDFGHIJJIFDCDFI', 'JLOPPONNMLKIHHHEDDDFGHJJJHFDCDFI', 'JMOPPONNNMKIIIGEDCDFGHJJJHFDCDGI', 'JLOPPONNNMLJIIHEDCDEFHIJJHFDCDFI', 'ILNPPPONNNLJIIHFDCCEFGIJJHFDCDFH', 'JMNPPPOOOMLKJIGECCCEFHIJIHFDCCFI', 'ILNOOPOONNMKJIGECCCDFHIJIHFDCCFH', 'ILNOPOOONNMKKIGFCCCDEGIIIHFDCDEI', 'JMNOOOPONNMLKIHECCCDFHIIIGFDDDFI', 'ILNOOPPOOOMLKJHFDCBCEGHIHHGDDDFH', 'JKNNOPONOOMLKJHFDCCDEGIIHHFEDEFI', 'ILNNOPONONNLJJHFDCCDEGHHHGFEDEGI', 'JLMNPOOONONLKJHFDCCDEGHHHGEEDEGI', 'ILLNPOONOPNLKJHFDCCDEGGHHGFEDEGI', 'JLLNPOONOPNMKJHFDDCDEFGHGGFEDEGI', 'IKKMOOONOPOMLKIGECDDEFGHHGFEEFFI', 'IJKMOOMNOONMLJIGEDDDEFGGGGFEFFGI', 'IJKLNPNMOPOMMKJHEDDDDEFGGGGFEEGH', 'JKNONMOPONLLJHFEDDDEFFGGFFFEGIII', 'IKNPMMNPONMLKIGEDDDDEFGGGFFFGHII', 'IKONMMOPONMMKIGEEEDDEFFGFFFFGIHI', 'ILONMNOPONMLKHGEEDDDEEFFFFFFGIHI', 'ILNNLMOPONNMKIGFEEDDEEFFFFFFHHGH', 'ILOMLNPPONNMKIGFEEDDDEFFFFFGHHGI', 'IMOMMNPPONNMJIHFFEDDCEEEFEFGHGGI', 'JMNMMNPPNNNMKIGGFEDCCDDFFEGIHGGI', 'IMMLMNPONNNMKJHGGEDDCDEFEFGHHGFI', 'ILMMMNOONNNMLJIHGFECCDDEFEGHHGFH', 'JLMMMNPONNNMLJIHGFDCCCDEEFHHHFFI', 'JKMMMOPOOONNLJIIGGDCBBDDDFGHHFFI', 'IKLLMOPOONNMKJJIHGDCBBCDDFGHHFFI', 'IKLLMPOPNNNMKKJJIGDCBCCCEFHHGEGI', 'IKLLNOOONMNMKKJJIGECBCCCEFHIGEFH', 'IKKNNOOONNMLLKJJIGDBBBBCFGHHFFGI', 'JKKMNOONNNLLKKKKJGDCBBBDEGIGGFGI', 'IJKLNOONNMLLKKKKJHEDCCBDFHHHGFGI', 'IKKMNONNNLKKKKLKJGEDCBCDGHHHGFGI', 'IJKMNONNMLKKKKLLJGEDBBCEGHHHFFGI', 'IJLMONNMLKKKKLLLIGEDBBDFGHHGFFGI', 'IKLNONNMLKKJKLLKIGEDBBDFGHHHGFHI', 'IKLMNNMLKJJJJKLLJHFDBBDFGHIHGGHI', 'IJLMNNMLKJIIJKLLKHFDBBDEGHIIGGHI', 'IKLNNNMLJJIIJKLLKHGDBBDEGHIHGGHI', 'IKLNONMLJIIIJKLLKIGDBBCEGHIHGGGI', 'IKMOONMKJIHIJLMLKJGDBBCFGHIHGGGI', 'IKMOOOMKJIHIKLMLKJFCBBDFGHHGGGGI', 'ILNOONMKIHHIKMMLLIFDBCDEGHHGGFGI', 'ILNOONLJIHHIKMMMLIFCBCDFGHHGFFGI', 'IMOPPNLJHGHILMMMKIFCCCDFHHHGFFGI', 'ILOPPNMKHHHIKMMMLIGDCCDFGHHGFFFH', 'JLOPPOMJHHHJLMNNLIECCCDFGHGFEEFI', 'ILOPPOMJHHHJLNOONJFDCCDFGGGEDDFH', 'ILOPPOLJHHIJMOPOMIFDDDDFGGEDCDFI', 'IKNOPOLHFDDDEFGFECCDFILNOPNLIHHI', 'IKNOPNKHFEEEFGGFDCDEGJLNONMKIHHI', 'IKNOPNKIGFEEFGGFDDDEGILMNNLKIHHI', 'IKNOPNLIHFEEFGGEDCDEFIKMNMLKIHHI', 'IKNOPNLJHGFFFGGEDDDEFIKLMMLJIHHI', 'IKMPPNLKIGFFGGGFDDDEFHJLMLKJIHHI', 'IKNPONLKIGFGHGFEEDDEFHJLLLKJIGHI', 'ILOPONMKIHGHHHFEDDDEFHJKLKJIHGHI', 'ILOPONMLIHHHHHFEDDDDFHJKKKJIGGGI', 'ILOPONNLJHHIIHFEDCCDFHJKKKJIGGGI', 'IMOPOONLJIIIIHFEDDCDFHIJKKJHGFGI', 'ILOPPONLJIIIIHGEDCCDFHIJKKIHGFGI', 'IMOPPPNMKJJJIHFEDCBCEGIJKKIHGFGH', 'ILNPPPNMKJJJJIGFDCBCEGIJKJIHFFGH', 'JMOPPONLKJJJIIGEDCCDEGIJJJIGFFGI', 'ILNOOONLLKKKJIHFDBBCDGIJKJIGFFGI', 'ILMOOONMLLLLLKIFDBBCEGIJJIHFEEGI', 'JLMNNNMMLMMMLJHFDBBDFHIJIHGFEEGI', 'IKMNNNMLLMMMLJIFDBBDFHIJIHGFEEGI', 'IKMNNNMMMNNNLKHFCBBDGHIJIGFEEEGI', 'JKLMNMMLMNNNLKIECBCEGIJJHGFEEEGI', 'IKLMNMLLMNONMKIFCBCEGIIIIHFEDEGI', 'IKLMNMLMNOONMKHECBDEHIJIHGFDDEGI', 'IKMMMLLMOOONNKHDBCDFHIIIHGEDDEGI', 'IKMMMLLMOPOONLHCBBDFHIJIHGDCCEGI', 'IKMMLLMOPPPPNJECBCEHIJJIGECCCEGI', 'IKLKJKLNOPPOMIFDDDFHIJIIGEDCDEGI', 'IKKKJKLMNOPOMIFEEFGIJJJIFEDCDEGI', 'IKKJJKLMNOPOMIGEEFHIJJJIGEDCDEGI', 'IJJJIJKMNOPOMJGFFFHIJKJIGEDCDEGI', 'IJKLMOPOMKHGFGHIJKJIGEDCDEGIJJJI', 'IJKLNPPNLIGGGHIJKKJHFDCCDFHIJJII', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'];
-    sampleVolumes = [0, 0, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 10, 10, 9, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6, 7, 7, 8, 9, 10, 10, 11, 11, 11, 10, 9, 9, 9, 8, 7, 7, 6, 5, 6, 7, 7, 7, 7, 7, 7, 6, 6, 7, 7, 7, 7, 7, 6, 0];
-    sampleFrequencies = [760, 987, 75, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 77, 78, 78, 78, 78, 78, 78, 78, 78, 78, 77, 78, 78, 78, 78, 78, 78, 78, 77, 77, 77, 77, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 987];
-    frameCount = 116;
-    repeatFrom = 0; // 96;
-    repeatLength = 40;
-    baseNote = 27;
+    loadSampleFromWavBuffer(arrayBuffer) {
+
+        const buffer = new Uint8Array(arrayBuffer);
+        const wav = new WaveFile(buffer);
+        const samples = normalizeWave(wav);
+
+        const sampleRate = wav.fmt.sampleRate;
+        const blockStep = Math.floor(sampleRate / 60);
+        const blockSize = blockStep * 2;
+        const frames = [];
+
+        // take slices of samples of size blockSize, stepping by blockStep
+        for (let i = 0; i < samples.length; i += blockStep) {
+            let block = samples.slice(i, i + blockSize);
+            // exit when block size is less than blockStep
+            if (block.length < blockStep) {
+                break;
+            }
+            frames.push(makeFrame(block, sampleRate));
+        }
+        const sampleWaveforms = [];
+        const sampleVolumes = [];
+        const sampleFrequencies = [];
+
+        for (const frame of frames) {
+            sampleWaveforms.push(frame.waveform.map((v) => String.fromCharCode(v + 65)).join(''));
+            sampleVolumes.push(frame.volume);
+            sampleFrequencies.push(frame.frequency);
+        }
+
+        this.sampleWaveforms = sampleWaveforms;
+        this.sampleVolumes = sampleVolumes;
+        this.sampleFrequencies = sampleFrequencies;
+    }
 
     getFrameCallback(originalFrequency) {
         const frequency = originalFrequency * 2**(this.transpose / 12);
@@ -50,11 +87,11 @@ export class Wave extends Model([
             } else if (this.waveType == waveType.SAMPLE) {
 
                 let waveIndex;
-                if (frame < this.frameCount) {
+                if (frame < this.sampleVolumes.length) {
                     waveIndex = frame;
-                } else if (this.repeatFrom > 0) {
-                    const indexWithinRepeat = (frame - this.frameCount) % this.repeatLength;
-                    waveIndex = this.repeatFrom + indexWithinRepeat;
+                } else if (this.sampleRepeatFrom > 0) {
+                    const indexWithinRepeat = (frame - this.sampleVolumes.length) % this.sampleRepeatLength;
+                    waveIndex = this.sampleRepeatFrom + indexWithinRepeat;
                 } else {
                     // sample has ended
                     return {
@@ -66,7 +103,7 @@ export class Wave extends Model([
                         ],
                     };
                 }
-                const baseFreq = 440 * 2**((this.baseNote-33) / 12);
+                const baseFreq = 440 * 2**((this.sampleBaseNote-33) / 12);
                 const freqMultiplier = originalFrequency / baseFreq;
 
                 const result = {
@@ -128,22 +165,22 @@ export class Wave extends Model([
         const waveStatements = [];
 
         if (this.waveType == waveType.SAMPLE) {
-            const baseFreq = 440 * 2**((this.baseNote-33) / 12);
-            const isLooped = this.repeatFrom > 0;
+            const baseFreq = 440 * 2**((this.sampleBaseNote-33) / 12);
+            const isLooped = this.sampleRepeatFrom > 0;
 
             modifierStatements.push(`  local waves={${this.sampleWaveforms.map((w) => `"${w}"`).join(',')}}`);
             modifierStatements.push(`  local vols={${this.sampleVolumes.join(',')}}`);
             modifierStatements.push(`  local freqs={${this.sampleFrequencies.join(',')}}`);
             if (isLooped) {
-                modifierStatements.push(`  if (t>=${this.frameCount}) then`);
-                modifierStatements.push(`    t=(t-${this.frameCount})%${this.repeatLength}+${this.repeatFrom}`);
+                modifierStatements.push(`  if (t>=${this.sampleVolumes.length}) then`);
+                modifierStatements.push(`    t=(t-${this.sampleVolumes.length})%${this.sampleRepeatLength}+${this.sampleRepeatFrom}`);
                 modifierStatements.push(`  end`);
                 modifierStatements.push(`  local w=waves[t+1]`);
                 modifierStatements.push(`  v=v*vols[t+1]//15`);
                 modifierStatements.push(`  f=freqs[t+1]*f//${baseFreq}`);
             } else {
                 modifierStatements.push(`  local w="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"`);
-                modifierStatements.push(`  if (t<${this.frameCount}) then`);
+                modifierStatements.push(`  if (t<${this.sampleVolumes.length}) then`);
                 modifierStatements.push(`    w=waves[t+1]`);
                 modifierStatements.push(`    v=v*vols[t+1]//15`);
                 modifierStatements.push(`    f=freqs[t+1]*f//${baseFreq}`);

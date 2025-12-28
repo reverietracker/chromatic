@@ -27,7 +27,9 @@
   "dependencies": {
     "catwalk": "^0.1.1",
     "catwalk-ui": "^0.2.0",
+    "cubic-spline": "^3.0.3",
     "file-dialog": "^0.0.8",
-    "save-file": "^2.3.1"
+    "save-file": "^2.3.1",
+    "wavefile": "^11.0.0"
   }
 }
