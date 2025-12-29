@@ -1,7 +1,7 @@
 import { Model, fields } from 'catwalk';
 import { WaveFile } from 'wavefile';
 
-import { normalizeWave, makeFrame } from '../util/sample.js';
+import { normalizeWave, makeFrame, getDominantFrequency } from '../util/sample.js';
 import { MAX_NOTE_NUM } from '../defs.js';
 
 export const waveType = {
@@ -41,7 +41,6 @@ export class Wave extends Model([
     new fields.ValueField('sampleFrequencies', {default: []}),
     new fields.IntegerField('sampleRepeatFrom', {default: 0, min: 0}),
     new fields.IntegerField('sampleRepeatLength', {default: 0, min: 0}),
-    new fields.IntegerField('sampleBaseNote', {default: 27, min: 1, max: MAX_NOTE_NUM}),
 ]) {
     loadSampleFromWavBuffer(arrayBuffer) {
 
@@ -63,6 +62,8 @@ export class Wave extends Model([
             }
             frames.push(makeFrame(block, sampleRate));
         }
+        const dominantFrequency = getDominantFrequency(frames) || 440;
+
         const sampleWaveforms = [];
         const sampleVolumes = [];
         const sampleFrequencies = [];
@@ -70,7 +71,7 @@ export class Wave extends Model([
         for (const frame of frames) {
             sampleWaveforms.push(frame.waveform.map((v) => String.fromCharCode(v + 65)).join(''));
             sampleVolumes.push(frame.volume);
-            sampleFrequencies.push(frame.frequency);
+            sampleFrequencies.push(frame.frequency / dominantFrequency);
         }
 
         this.sampleWaveforms = sampleWaveforms;
@@ -103,11 +104,9 @@ export class Wave extends Model([
                         ],
                     };
                 }
-                const baseFreq = 440 * 2**((this.sampleBaseNote-33) / 12);
-                const freqMultiplier = originalFrequency / baseFreq;
 
                 const result = {
-                    frequency: this.sampleFrequencies[waveIndex] * freqMultiplier,
+                    frequency: Math.round(frequency * this.sampleFrequencies[waveIndex]),
                     volume: this.sampleVolumes[waveIndex],
                     waveform: this.sampleWaveforms[waveIndex].split('').map((c) => c.charCodeAt(0) - 65),
                 };
@@ -165,7 +164,6 @@ export class Wave extends Model([
         const waveStatements = [];
 
         if (this.waveType == waveType.SAMPLE) {
-            const baseFreq = 440 * 2**((this.sampleBaseNote-33) / 12);
             const isLooped = this.sampleRepeatFrom > 0;
 
             modifierStatements.push(`  local waves={${this.sampleWaveforms.map((w) => `"${w}"`).join(',')}}`);
@@ -177,13 +175,13 @@ export class Wave extends Model([
                 modifierStatements.push(`  end`);
                 modifierStatements.push(`  local w=waves[t+1]`);
                 modifierStatements.push(`  v=v*vols[t+1]//15`);
-                modifierStatements.push(`  f=freqs[t+1]*f//${baseFreq}`);
+                modifierStatements.push(`  f=freqs[t+1]*f//1`);
             } else {
                 modifierStatements.push(`  local w="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"`);
                 modifierStatements.push(`  if (t<${this.sampleVolumes.length}) then`);
                 modifierStatements.push(`    w=waves[t+1]`);
                 modifierStatements.push(`    v=v*vols[t+1]//15`);
-                modifierStatements.push(`    f=freqs[t+1]*f//${baseFreq}`);
+                modifierStatements.push(`    f=freqs[t+1]*f//1`);
                 modifierStatements.push(`  else`);
                 modifierStatements.push(`    v=0`);
                 modifierStatements.push(`    f=440`);

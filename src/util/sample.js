@@ -1,10 +1,11 @@
 import Spline from 'cubic-spline';
 
 export class Frame {
-    constructor(frequency, volume, waveform) {
+    constructor(frequency, volume, waveform, confidence) {
         this.frequency = frequency;
         this.volume = volume;
         this.waveform = waveform;
+        this.confidence = confidence;
     }
 
     repr() {
@@ -117,5 +118,28 @@ export const makeFrame = (block, sampleRate) => {
         );
     }
 
-    return new Frame(Math.round(freq), finalAmpl, finalWave);
+    return new Frame(freq, finalAmpl, finalWave, confidence);
+}
+
+export const getDominantFrequency = (frames) => {
+    let frameCount = 0;
+    let cosSum = 0;
+    let sinSum = 0;
+    for (const frame of frames) {
+        // discard frames with low confidence
+        if (frame.confidence < 1.3) continue;
+        // constrain frequency to a single octave
+        const octaveFreq = Math.log2(frame.frequency) % 1;
+        // translate to an angle to calculate circular mean
+        const angle = octaveFreq * 2 * Math.PI;
+        cosSum += Math.cos(angle);
+        sinSum += Math.sin(angle);
+        frameCount++;
+    }
+    if (frameCount == 0) return null;
+    const meanAngle = Math.atan2(sinSum / frameCount, cosSum / frameCount);
+    let meanOctaveFreq = meanAngle / (2 * Math.PI);
+    // convert back to frequency
+    const dominantFreq = 2 ** meanOctaveFreq * 256;  // scale to an arbitrary power of two
+    return dominantFreq;
 }

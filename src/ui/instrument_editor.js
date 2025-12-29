@@ -104,16 +104,12 @@ class InstrumentEditor extends Container {
                 this.envelopeFieldset.node.style.display = 'none';
                 this.vibratoFieldset.node.style.display = 'none';
                 this.harmonicsPanel.node.style.display = 'none';
-                this.node.querySelector('.transpose-panel').style.display = 'none';
-                this.node.querySelector('.slide-step-panel').style.display = 'none';
                 this.node.querySelector('.import-sample-panel').style.display = '';
             } else {
                 this.phaseFieldset.node.style.display = '';
                 this.envelopeFieldset.node.style.display = '';
                 this.vibratoFieldset.node.style.display = '';
                 this.harmonicsPanel.node.style.display = '';
-                this.node.querySelector('.transpose-panel').style.display = '';
-                this.node.querySelector('.slide-step-panel').style.display = '';
                 this.node.querySelector('.import-sample-panel').style.display = 'none';
             }
             if (wt == waveType.NOISE || wt == waveType.SINE) {
