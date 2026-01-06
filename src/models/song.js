@@ -2,7 +2,8 @@ import { Model, fields } from 'catwalk';
 
 import { Wave } from "./instruments";
 import { Pattern } from "./pattern";
-import { PATTERN_COUNT, INSTRUMENT_COUNT } from '../defs';
+import { Ornament } from './ornament';
+import { PATTERN_COUNT, INSTRUMENT_COUNT, ORNAMENT_COUNT } from '../defs';
 
 const PLAYER_CODE = `
 note_freqs={}
@@ -83,6 +84,11 @@ export class Song extends Model([
         'positions',
         new fields.IntegerField('position', {default: 0, min: 0, max: PATTERN_COUNT - 1}),
         {length: 256},
+    ),
+    new fields.ListField(
+        'ornaments',
+        new fields.ModelField('ornament', Ornament),
+        {startIndex: 1, length: ORNAMENT_COUNT},
     ),
     new fields.IntegerField('speed', {default: 6, min: 1, max: 31}),
     new fields.IntegerField('length', {default: 1, min: 1, max: 256}),

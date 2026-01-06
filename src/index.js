@@ -7,6 +7,7 @@ import { AudioController } from "./audio/controller";
 import { EditorState } from "./models/editor_state";
 import { Song } from "./models/song";
 import { InstrumentPanel } from "./ui/instrument_editor";
+import { OrnamentPanel } from "./ui/ornament_editor";
 import { PatternGrid } from './ui/pattern_grid';
 import { SongEditor } from './ui/song_editor';
 
@@ -17,6 +18,8 @@ const editorState = new EditorState();
 
 const instrumentPanel = new InstrumentPanel(audio);
 document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
+const ornamentPanel = new OrnamentPanel(audio);
+document.querySelector(".ornament-panel-positioner").appendChild(ornamentPanel.node);
 const songEditor = new SongEditor();
 document.body.appendChild(songEditor.node);
 songEditor.trackEditorState(editorState);
@@ -34,6 +37,7 @@ editorState.on("changePattern", (patternIndex) => {
 const openSong = (newSong) => {
     song = newSong;
     instrumentPanel.trackModel(song);
+    ornamentPanel.trackModel(song);
     songEditor.trackModel(song);
     audio.song = song;
     editorState.pattern = 0;
@@ -76,6 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeInstrumentEditorButton = document.getElementById("close-instrument-panel");
     closeInstrumentEditorButton.addEventListener('click', () => {
         instrumentEditorContainer.style.display = 'none';
+    });
+
+    const openOrnamentEditorButton = document.getElementById("open-ornament-panel");
+    const ornamentEditorContainer = document.querySelector(".ornament-panel");
+    ornamentEditorContainer.style.display = 'none';
+    openOrnamentEditorButton.addEventListener('click', () => {
+        ornamentEditorContainer.style.display = 'block';
+    });
+    const closeOrnamentEditorButton = document.getElementById("close-ornament-panel");
+    closeOrnamentEditorButton.addEventListener('click', () => {
+        ornamentEditorContainer.style.display = 'none';
     });
 
     const playPatternButton = document.getElementById("play-pattern");

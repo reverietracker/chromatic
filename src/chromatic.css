@@ -1,8 +1,8 @@
-.instrument-panel-positioner {
+.modal-panel-positioner {
     position: absolute;
     left: 50%;
 }
-.instrument-panel {
+.modal-panel {
     width: 800px;
     position: absolute;
     left: -400px;
@@ -11,7 +11,7 @@
     padding: 8px;
 }
 
-.instrument-panel label {
+.modal-panel label {
     padding-right: 4px;
 }
 
@@ -157,4 +157,15 @@
 }
 .position-list button.disabled {
     color: #aaa;
+}
+
+#pitches {
+    margin: 0;
+    padding: 0;
+}
+#pitches li {
+    display: inline;
+}
+#pitches input {
+    width: 3em;
 }

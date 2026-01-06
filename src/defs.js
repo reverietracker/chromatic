@@ -18,3 +18,4 @@ export const MAX_NOTE_NUM = OCTAVE_COUNT * 12;
 
 export const PATTERN_COUNT = 64;
 export const INSTRUMENT_COUNT = 15;
+export const ORNAMENT_COUNT = 15;

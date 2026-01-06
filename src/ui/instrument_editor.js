@@ -214,7 +214,7 @@ export class InstrumentPanel extends Component {
 
     createNode() {
         const node = (
-            <div class="instrument-panel">
+            <div class="modal-panel instrument-panel">
                 <div class="toolbar">
                     <label for="instrument">Instruments</label> <select id="instrument"></select>
                     <button id="close-instrument-panel">Close</button>
