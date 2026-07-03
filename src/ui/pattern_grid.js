@@ -106,7 +106,7 @@ class Grid {
 const formatNote = (note) => {
     return note === 0 ? '---' : NOTES_BY_NUM[note].name;
 }
-const formatInstrument = (val) => {
+const formatHex = (val) => {
     return val.toString(16).toUpperCase();
 }
 
@@ -179,22 +179,22 @@ export class PatternGrid extends Component {
     }
 
     createNode() {
-        this.grid = new Grid(8, 64);
+        this.grid = new Grid(20, 64);
         const tableHeader = this.grid.node.createTHead();
         const headerRow = tableHeader.insertRow();
         this.grid.node.insertBefore(<colgroup><col></col></colgroup>, tableHeader);
         headerRow.insertCell();
         for (let i = 0; i < 4; i++) {
-            this.grid.node.insertBefore(<colgroup className="channel"><col></col><col></col></colgroup>, tableHeader);
+            this.grid.node.insertBefore(<colgroup className="channel"><col></col><col></col><col></col><col></col><col></col></colgroup>, tableHeader);
             const headerCell = headerRow.insertCell();
-            headerCell.colSpan = 2;
+            headerCell.colSpan = 5;
             headerCell.innerText = `${i + 1}`;
         }
 
 
         this.grid.keyDown = (row, col, e) => {
-            const channelIndex = Math.floor(col / 2);
-            const channelColumn = col % 2;
+            const channelIndex = Math.floor(col / 5);
+            const channelColumn = col % 5;
             if (channelColumn === 0 && e.key in this.noteKeyDownHandlers && !e.repeat) {
                 this.noteKeyDownHandlers[e.key](channelIndex, row);
             } else if (channelColumn === 1 && e.key in this.instrumentKeyDownHandlers && !e.repeat) {
@@ -222,9 +222,14 @@ export class PatternGrid extends Component {
 
     changeRowHandler = (channel, row, field, value) => {
         if (field == 'note') {
-            this.grid.setCell(row, channel * 2, formatNote(value));
-        } else {
-            this.grid.setCell(row, channel * 2 + 1, formatInstrument(value));
+            this.grid.setCell(row, channel * 5, formatNote(value));
+        } else if (field == 'instrument') {
+            this.grid.setCell(row, channel * 5 + 1, formatHex(value));
+        } else if (field == 'effect') {
+            this.grid.setCell(row, channel * 5 + 2, formatHex(value));
+        } else if (field == 'parameter') {
+            this.grid.setCell(row, channel * 5 + 3, formatHex(Math.floor(value/16)));
+            this.grid.setCell(row, channel * 5 + 4, formatHex(value % 16));
         }
     }
     trackModel(model) {
@@ -241,8 +246,11 @@ export class PatternGrid extends Component {
             const channel = this.model.channels[i];
             for (let j = 0; j < 64; j++) {
                 const row = channel.rows[j];
-                this.grid.setCell(j, i * 2, formatNote(row.note));
-                this.grid.setCell(j, i * 2 + 1, formatInstrument(row.instrument));
+                this.grid.setCell(j, i * 5, formatNote(row.note));
+                this.grid.setCell(j, i * 5 + 1, formatHex(row.instrument));
+                this.grid.setCell(j, i * 5 + 2, formatHex(row.effect));
+                this.grid.setCell(j, i * 5 + 3, formatHex(Math.floor(row.parameter/16)));
+                this.grid.setCell(j, i * 5 + 4, formatHex(row.parameter % 16));
                 if (j >= this.model.length) {
                     this.grid.rows[j].style.display = 'none';
                 } else {

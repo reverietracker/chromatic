@@ -24,6 +24,8 @@ class RowField extends fields.StructField {
         const childFields = [
             new NoteField('note', {default: 0}),
             new fields.IntegerField('instrument', {default: 0}),
+            new fields.IntegerField('effect', {default: 0}),
+            new fields.IntegerField('parameter', {default: 0}),
         ];
         super(name, childFields, options);
     }
@@ -31,14 +33,18 @@ class RowField extends fields.StructField {
     serialize(obj) {
         const noteName = this.fieldLookup.note.serialize(obj.note);
         const instrument = obj.instrument.toString(16).toUpperCase();
-        return `${noteName} ${instrument}`;
+        const effect = obj.effect.toString(16).toUpperCase();
+        const parameter = obj.parameter.toString(16).toUpperCase().padStart(2, '0');
+        return `${noteName} ${instrument}${effect}${parameter}`;
     }
 
     deserialize(rowString) {
         const noteName = rowString.substring(0,3);
         return {
             'note': this.fieldLookup.note.deserialize(noteName),
-            'instrument': parseInt(rowString.substring(4,5), 16)
+            'instrument': parseInt(rowString.substring(4,5), 16),
+            'effect': parseInt(rowString.substring(5,6) || "0", 16),
+            'parameter': parseInt(rowString.substring(6,8) || "00", 16),
         };
     }
 }
