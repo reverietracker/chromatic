@@ -1,7 +1,7 @@
 import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 import fileDialog from 'file-dialog';
 
-import { Wave, waveType } from "../models/instruments";
+import { Wave, waveType } from "../engines/chromatic/models/instruments";
 import { Modal } from "./modal";
 import { Scope } from "./scope";
 import { NOTE_NAMES, NOTES_BY_NUM, OCTAVE_COUNT } from "../defs";

@@ -1,7 +1,7 @@
 import { Container, NumberInput } from 'catwalk-ui';
-import { Song } from "../models/song";
-import { EditorState } from "../models/editor_state";
-import { Pattern } from "../models/pattern";
+import { Song } from "../engines/chromatic/models/song";
+import { EditorState } from "../engines/chromatic/models/editor_state";
+import { Pattern } from "../engines/chromatic/models/pattern";
 import { PositionList } from './position_list';
 
 export class SongEditor extends Container {
