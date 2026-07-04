@@ -2,6 +2,7 @@ import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, Sel
 import fileDialog from 'file-dialog';
 
 import { Wave, waveType } from "../models/instruments";
+import { Modal } from "./modal";
 import { Scope } from "./scope";
 import { NOTE_NAMES, NOTES_BY_NUM, OCTAVE_COUNT } from "../defs";
 
@@ -206,43 +207,30 @@ class InstrumentEditor extends Container {
     }
 }
 
-export class InstrumentPanel extends Component {
+export class InstrumentPanel extends Modal {
     constructor(audio) {
         super();
         this.instrumentEditor = new InstrumentEditor(audio);
     }
 
-    createNode() {
+    createBody() {
         const node = (
-            <div class="modal-panel-positioner">
-                <div class="modal-panel">
-                    <div class="toolbar">
-                        <label for="instrument">Instruments</label> <select id="instrument"></select>
-                        <button class="close">Close</button>
-                    </div>
-                    {this.instrumentEditor}
+            <div>
+                <div class="toolbar">
+                    <label for="instrument">Instruments</label> <select id="instrument"></select>
+                    {this.closeButton}
                 </div>
+                {this.instrumentEditor}
             </div>
         );
-        this.modal = node.querySelector(".modal-panel");
         this.instrumentSelector = node.querySelector("#instrument");
         this.instrumentSelector.addEventListener('change', () => {
             const instrumentIndex = parseInt(this.instrumentSelector.value);
             const instrument = this.model.instruments[instrumentIndex];
             this.instrumentEditor.trackModel(instrument);
         });
-        node.querySelector(".close").addEventListener('click', () => {
-            this.close();
-        });
-        this.close();
     
         return node;
-    }
-    open() {
-        this.modal.style.display = 'block';
-    }
-    close() {
-        this.modal.style.display = 'none';
     }
 
     trackModel(song) {

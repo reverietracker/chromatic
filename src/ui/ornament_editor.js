@@ -1,5 +1,6 @@
 import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
+import { Modal } from "./modal";
 import { Ornament } from "../models/ornament";
 
 
@@ -40,44 +41,30 @@ class OrnamentEditor extends Container {
     }
 }
 
-export class OrnamentPanel extends Component {
+export class OrnamentPanel extends Modal {
     constructor(audio) {
         super();
         this.ornamentEditor = new OrnamentEditor(audio);
     }
 
-    createNode() {
+    createBody() {
         const node = (
-            <div class="modal-panel-positioner">
-                <div class="modal-panel">
-                    <div class="toolbar">
-                        <label for="ornament">Ornaments</label> <select id="ornament"></select>
-                        <button class="close">Close</button>
-                    </div>
-                    {this.ornamentEditor}
+            <div>
+                <div class="toolbar">
+                    <label for="ornament">Ornaments</label> <select id="ornament"></select>
+                    {this.closeButton}
                 </div>
+                {this.ornamentEditor}
             </div>
         );
-        this.modal = node.querySelector(".modal-panel");
         this.ornamentSelector = node.querySelector("#ornament");
         this.ornamentSelector.addEventListener('change', () => {
             const ornamentIndex = parseInt(this.ornamentSelector.value);
             const ornament = this.model.ornaments[ornamentIndex];
             this.ornamentEditor.trackModel(ornament);
         });
-        node.querySelector(".close").addEventListener('click', () => {
-            this.close();
-        });
-        this.close();
 
         return node;
-    }
-
-    open() {
-        this.modal.style.display = 'block';
-    }
-    close() {
-        this.modal.style.display = 'none';
     }
 
     trackModel(song) {
