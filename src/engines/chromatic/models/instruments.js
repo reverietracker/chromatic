@@ -2,7 +2,7 @@ import { Model, fields } from 'catwalk';
 import { WaveFile } from 'wavefile';
 
 import { normalizeWave, makeFrame, getDominantFrequency } from '../../../util/sample.js';
-import { MAX_NOTE_NUM } from '../../../defs.js';
+import { MAX_NOTE_NUM } from '../defs';
 
 export const waveType = {
     SQUARE: 1,

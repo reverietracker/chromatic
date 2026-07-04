@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { TICSynth } from './ticsynth';
-import { NOTES_BY_NUM } from '../defs';
+import { NOTES_BY_NUM } from '../engines/chromatic/defs';
 
 export class AudioController extends EventEmitter {
     constructor() {

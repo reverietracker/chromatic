@@ -1,5 +1,5 @@
 import { Component } from 'catwalk-ui';
-import { NOTES_BY_NUM, MAX_NOTE_NUM } from '../defs';
+import { NOTES_BY_NUM, MAX_NOTE_NUM } from '../engines/chromatic/defs';
 
 class Grid {
     constructor(columnCount, rowCount) {

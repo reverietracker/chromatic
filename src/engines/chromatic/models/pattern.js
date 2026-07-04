@@ -1,5 +1,5 @@
 import { Model, fields } from 'catwalk';
-import { NOTE_NUMS_BY_NAME, NOTES_BY_NUM } from '../../../defs';
+import { NOTE_NUMS_BY_NAME, NOTES_BY_NUM } from '../defs';
 
 class NoteField extends fields.IntegerField {
     serialize(val) {

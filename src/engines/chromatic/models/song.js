@@ -3,7 +3,7 @@ import { Model, fields } from 'catwalk';
 import { Wave } from "./instruments";
 import { Pattern } from "./pattern";
 import { Ornament } from './ornament';
-import { PATTERN_COUNT, INSTRUMENT_COUNT, ORNAMENT_COUNT } from '../../../defs';
+import { PATTERN_COUNT, INSTRUMENT_COUNT, ORNAMENT_COUNT } from '../defs';
 
 const PLAYER_CODE = `
 note_freqs={}
