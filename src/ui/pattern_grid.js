@@ -160,6 +160,29 @@ export class PatternGrid extends Component {
                 if (!this.audio.isPlaying) this.playRow(row);
             }
         });
+        this.effectKeyDownHandlers = {};
+        '0123456789abcdef'.split('').forEach((key, i) => {
+            this.effectKeyDownHandlers[key] = (channelIndex, row) => {
+                this.model.channels[channelIndex].setRow(row, 'effect', i);
+                if (!this.audio.isPlaying) this.playRow(row);
+            }
+        });
+        this.parameterHighKeyDownHandlers = {};
+        '0123456789abcdef'.split('').forEach((key, i) => {
+            this.parameterHighKeyDownHandlers[key] = (channelIndex, row) => {
+                const oldValue = this.model.channels[channelIndex].rows[row].parameter;
+                this.model.channels[channelIndex].setRow(row, 'parameter', i * 16 + (oldValue % 16));
+                if (!this.audio.isPlaying) this.playRow(row);
+            }
+        });
+        this.parameterLowKeyDownHandlers = {};
+        '0123456789abcdef'.split('').forEach((key, i) => {
+            this.parameterLowKeyDownHandlers[key] = (channelIndex, row) => {
+                const oldValue = this.model.channels[channelIndex].rows[row].parameter;
+                this.model.channels[channelIndex].setRow(row, 'parameter', Math.floor(oldValue / 16) * 16 + i);
+                if (!this.audio.isPlaying) this.playRow(row);
+            }
+        });
         this.isPlayingRow = false;
     }
 
@@ -199,6 +222,12 @@ export class PatternGrid extends Component {
                 this.noteKeyDownHandlers[e.key](channelIndex, row);
             } else if (channelColumn === 1 && e.key in this.instrumentKeyDownHandlers && !e.repeat) {
                 this.instrumentKeyDownHandlers[e.key](channelIndex, row);
+            } else if (channelColumn === 2 && e.key in this.effectKeyDownHandlers && !e.repeat) {
+                this.effectKeyDownHandlers[e.key](channelIndex, row);
+            } else if (channelColumn === 3 && e.key in this.parameterHighKeyDownHandlers && !e.repeat) {
+                this.parameterHighKeyDownHandlers[e.key](channelIndex, row);
+            } else if (channelColumn === 4 && e.key in this.parameterLowKeyDownHandlers && !e.repeat) {
+                this.parameterLowKeyDownHandlers[e.key](channelIndex, row);
             }
         };
         this.grid.keyUp = () => {
