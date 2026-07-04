@@ -214,22 +214,35 @@ export class InstrumentPanel extends Component {
 
     createNode() {
         const node = (
-            <div class="modal-panel instrument-panel">
-                <div class="toolbar">
-                    <label for="instrument">Instruments</label> <select id="instrument"></select>
-                    <button id="close-instrument-panel">Close</button>
+            <div class="modal-panel-positioner">
+                <div class="modal-panel">
+                    <div class="toolbar">
+                        <label for="instrument">Instruments</label> <select id="instrument"></select>
+                        <button class="close">Close</button>
+                    </div>
+                    {this.instrumentEditor}
                 </div>
-                {this.instrumentEditor}
             </div>
         );
+        this.modal = node.querySelector(".modal-panel");
         this.instrumentSelector = node.querySelector("#instrument");
         this.instrumentSelector.addEventListener('change', () => {
             const instrumentIndex = parseInt(this.instrumentSelector.value);
             const instrument = this.model.instruments[instrumentIndex];
             this.instrumentEditor.trackModel(instrument);
         });
+        node.querySelector(".close").addEventListener('click', () => {
+            this.close();
+        });
+        this.close();
     
         return node;
+    }
+    open() {
+        this.modal.style.display = 'block';
+    }
+    close() {
+        this.modal.style.display = 'none';
     }
 
     trackModel(song) {

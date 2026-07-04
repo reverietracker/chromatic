@@ -17,7 +17,7 @@ let song;
 const editorState = new EditorState();
 
 const instrumentPanel = new InstrumentPanel(audio);
-document.querySelector(".instrument-panel-positioner").appendChild(instrumentPanel.node);
+document.body.appendChild(instrumentPanel.node);
 const ornamentPanel = new OrnamentPanel(audio);
 document.querySelector(".ornament-panel-positioner").appendChild(ornamentPanel.node);
 const songEditor = new SongEditor();
@@ -71,15 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSync(song.getLuaCode(), "song.lua");
     });
 
-    const openInstrumentEditorButton = document.getElementById("open-instrument-panel");
-    const instrumentEditorContainer = document.querySelector(".instrument-panel");
-    instrumentEditorContainer.style.display = 'none';
-    openInstrumentEditorButton.addEventListener('click', () => {
-        instrumentEditorContainer.style.display = 'block';
-    });
-    const closeInstrumentEditorButton = document.getElementById("close-instrument-panel");
-    closeInstrumentEditorButton.addEventListener('click', () => {
-        instrumentEditorContainer.style.display = 'none';
+    document.getElementById("open-instrument-panel").addEventListener('click', () => {
+        instrumentPanel.open();
     });
 
     const openOrnamentEditorButton = document.getElementById("open-ornament-panel");
