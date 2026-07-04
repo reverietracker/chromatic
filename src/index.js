@@ -19,7 +19,7 @@ const editorState = new EditorState();
 const instrumentPanel = new InstrumentPanel(audio);
 document.body.appendChild(instrumentPanel.node);
 const ornamentPanel = new OrnamentPanel(audio);
-document.querySelector(".ornament-panel-positioner").appendChild(ornamentPanel.node);
+document.body.appendChild(ornamentPanel.node);
 const songEditor = new SongEditor();
 document.body.appendChild(songEditor.node);
 songEditor.trackEditorState(editorState);
@@ -75,15 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         instrumentPanel.open();
     });
 
-    const openOrnamentEditorButton = document.getElementById("open-ornament-panel");
-    const ornamentEditorContainer = document.querySelector(".ornament-panel");
-    ornamentEditorContainer.style.display = 'none';
-    openOrnamentEditorButton.addEventListener('click', () => {
-        ornamentEditorContainer.style.display = 'block';
-    });
-    const closeOrnamentEditorButton = document.getElementById("close-ornament-panel");
-    closeOrnamentEditorButton.addEventListener('click', () => {
-        ornamentEditorContainer.style.display = 'none';
+    document.getElementById("open-ornament-panel").addEventListener('click', () => {
+        ornamentPanel.open();
     });
 
     const playPatternButton = document.getElementById("play-pattern");

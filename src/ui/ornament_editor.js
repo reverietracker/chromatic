@@ -48,22 +48,36 @@ export class OrnamentPanel extends Component {
 
     createNode() {
         const node = (
-            <div class="modal-panel ornament-panel">
-                <div class="toolbar">
-                    <label for="ornament">Ornaments</label> <select id="ornament"></select>
-                    <button id="close-ornament-panel">Close</button>
+            <div class="modal-panel-positioner">
+                <div class="modal-panel">
+                    <div class="toolbar">
+                        <label for="ornament">Ornaments</label> <select id="ornament"></select>
+                        <button class="close">Close</button>
+                    </div>
+                    {this.ornamentEditor}
                 </div>
-                {this.ornamentEditor}
             </div>
         );
+        this.modal = node.querySelector(".modal-panel");
         this.ornamentSelector = node.querySelector("#ornament");
         this.ornamentSelector.addEventListener('change', () => {
             const ornamentIndex = parseInt(this.ornamentSelector.value);
             const ornament = this.model.ornaments[ornamentIndex];
             this.ornamentEditor.trackModel(ornament);
         });
-    
+        node.querySelector(".close").addEventListener('click', () => {
+            this.close();
+        });
+        this.close();
+
         return node;
+    }
+
+    open() {
+        this.modal.style.display = 'block';
+    }
+    close() {
+        this.modal.style.display = 'none';
     }
 
     trackModel(song) {
