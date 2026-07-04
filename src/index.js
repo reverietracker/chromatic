@@ -6,6 +6,7 @@ import "./chromatic.css";
 import { AudioController } from "./audio/controller";
 import { EditorState } from "./models/editor_state";
 import { Song } from "./models/song";
+import { Menu } from "./ui/menu";
 import { InstrumentPanel } from "./ui/instrument_editor";
 import { OrnamentPanel } from "./ui/ornament_editor";
 import { PatternGrid } from './ui/pattern_grid';
@@ -24,6 +25,42 @@ const songEditor = new SongEditor();
 document.body.appendChild(songEditor.node);
 songEditor.trackEditorState(editorState);
 songEditor.trackAudio(audio);
+
+const menu = new Menu([
+    {label: "Open", action: () => {
+        fileDialog().then(files => {
+            files[0].text().then(text => {
+                const newSong = Song.fromJSON(text);
+                openSong(newSong);
+            });
+        });
+    }},
+    {label: "Save", action: () => {
+        saveSync(song.toJSON(), "song.cmt");
+    }},
+    {label: "Export", action: () => {
+        saveSync(song.getLuaCode(), "song.lua");
+    }},
+    {label: "Instruments", action: () => {
+        instrumentPanel.open();
+    }},
+    {label: "Ornaments", action: () => {
+        ornamentPanel.open();
+    }},
+    {label: "Stop", action: () => {
+        audio.stop();
+    }},
+    {label: "Play Pattern", action: () => {
+        audio.playPattern(song.patterns[editorState.pattern]);
+    }},
+    {label: "Play All", action: () => {
+        audio.playSong(0);
+    }},
+    {label: "Play From Position", action: () => {
+        audio.playSong(editorState.selectedPosition);
+    }},
+]);
+document.querySelector("#menu-container").prepend(menu.node);
 
 const patternGrid = new PatternGrid(audio);
 document.body.appendChild(patternGrid.node);
@@ -50,54 +87,5 @@ document.addEventListener('DOMContentLoaded', () => {
     masterVolumeControl.addEventListener('input', () => {
         audio.setVolume(masterVolumeControl.value / 1000);
     })
-
-    const openButton = document.getElementById("open");
-    openButton.addEventListener('click', () => {
-        fileDialog().then(files => {
-            files[0].text().then(text => {
-                const newSong = Song.fromJSON(text);
-                openSong(newSong);
-            });
-        });
-    });
-
-    const saveButton = document.getElementById("save");
-    saveButton.addEventListener('click', () => {
-        saveSync(song.toJSON(), "song.cmt");
-    });
-
-    const exportButton = document.getElementById("export");
-    exportButton.addEventListener('click', () => {
-        saveSync(song.getLuaCode(), "song.lua");
-    });
-
-    document.getElementById("open-instrument-panel").addEventListener('click', () => {
-        instrumentPanel.open();
-    });
-
-    document.getElementById("open-ornament-panel").addEventListener('click', () => {
-        ornamentPanel.open();
-    });
-
-    const playPatternButton = document.getElementById("play-pattern");
-    playPatternButton.addEventListener('click', () => {
-        audio.playPattern(song.patterns[editorState.pattern]);
-    });
-
-    const stopButton = document.getElementById("stop");
-    stopButton.addEventListener('click', () => {
-        audio.stop();
-    });
-
-    const playAllButton = document.getElementById("play-all");
-    playAllButton.addEventListener('click', () => {
-        audio.playSong(0);
-    });
-
-    const playFromPositionButton = document.getElementById("play-from-position");
-    playFromPositionButton.addEventListener('click', () => {
-        audio.playSong(editorState.selectedPosition);
-    });
-
     openSong(new Song());
 });

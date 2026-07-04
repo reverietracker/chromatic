@@ -1,5 +1,13 @@
+ul.menu {
+    padding: 0;
+}
+ul.menu li {
+    display: inline;
+}
+
 .modal-panel-positioner {
     position: absolute;
+    top: 20px;
     left: 50%;
 }
 .modal-panel {
