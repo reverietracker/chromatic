@@ -1,7 +1,7 @@
 import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 
-import { Modal } from "./modal";
-import { Ornament } from "../engines/chromatic/models/ornament";
+import { Modal } from "../../../ui/modal";
+import { Ornament } from "../models/ornament";
 
 
 class PitchesPanel extends InputList.forField(Ornament.fields.pitches, {

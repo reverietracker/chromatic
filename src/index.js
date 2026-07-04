@@ -7,8 +7,8 @@ import { AudioController } from "./audio/controller";
 import { EditorState } from "./engines/chromatic/models/editor_state";
 import { Song } from "./engines/chromatic/models/song";
 import { Menu } from "./ui/menu";
-import { InstrumentPanel } from "./ui/instrument_editor";
-import { OrnamentPanel } from "./ui/ornament_editor";
+import { InstrumentPanel } from "./engines/chromatic/ui/instrument_editor";
+import { OrnamentPanel } from "./engines/chromatic/ui/ornament_editor";
 import { PatternGrid } from './ui/pattern_grid';
 import { SongEditor } from './ui/song_editor';
 

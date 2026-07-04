@@ -1,10 +1,10 @@
 import { Component, Container, Fieldset, InputList, NumberInput, RangeInput, SelectInput, TextInput } from 'catwalk-ui';
 import fileDialog from 'file-dialog';
 
-import { Wave, waveType } from "../engines/chromatic/models/instruments";
-import { Modal } from "./modal";
-import { Scope } from "./scope";
-import { NOTE_NAMES, NOTES_BY_NUM, OCTAVE_COUNT } from "../engines/chromatic/defs";
+import { Modal } from "../../../ui/modal";
+import { Scope } from "../../../ui/scope";
+import { NOTE_NAMES, NOTES_BY_NUM, OCTAVE_COUNT } from "../defs";
+import { Wave, waveType } from "../models/instruments";
 
 const KEY_POSITIONS = [0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 5.5, 6];
 
