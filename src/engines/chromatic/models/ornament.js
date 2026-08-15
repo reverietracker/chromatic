@@ -6,6 +6,7 @@ export class Ornament extends Model([
         new fields.IntegerField('pitch', {default: 0, min: -128, max: 127}),
         {length: 32},
     ),
+    new fields.IntegerField('length', {default: 32, min: 1, max: 32}),
 ]) {
     isEmpty() {
         for (const pitch of this.pitches) {

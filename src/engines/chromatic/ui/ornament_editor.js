@@ -23,6 +23,7 @@ class PitchesPanel extends InputList.forField(Ornament.fields.pitches, {
 class OrnamentEditor extends Container {
     static components = {
         pitchesPanel: PitchesPanel,
+        lengthInput: NumberInput.forField(Ornament.fields.length),
     };
 
     constructor(audio) {
@@ -33,6 +34,7 @@ class OrnamentEditor extends Container {
     createNode() {
         const node = (
             <div class="section">
+                {this.lengthInput.labelNode}{this.lengthInput}
                 {this.pitchesPanel}
             </div>
         );
