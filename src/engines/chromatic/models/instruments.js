@@ -79,84 +79,88 @@ export class Wave extends Model([
         this.sampleFrequencies = sampleFrequencies;
     }
 
-    getFrameCallback(originalFrequency) {
-        const frequency = originalFrequency * 2**(this.transpose / 12);
-        return (frame) => {
-            const waveform = new Array(32);
-            if (this.waveType == waveType.NOISE) {
-                for (let i = 0; i < 32; i++) waveform[i] = 0;
-            } else if (this.waveType == waveType.SAMPLE) {
+    getFrame(frequency, time) {
+        const noteFrequency = frequency * 2**(this.transpose / 12);
+        const waveform = new Array(32);
+        if (this.waveType == waveType.NOISE) {
+            for (let i = 0; i < 32; i++) waveform[i] = 0;
+        } else if (this.waveType == waveType.SAMPLE) {
 
-                let waveIndex;
-                if (frame < this.sampleVolumes.length) {
-                    waveIndex = frame;
-                } else if (this.sampleRepeatFrom > 0) {
-                    const indexWithinRepeat = (frame - this.sampleVolumes.length) % this.sampleRepeatLength;
-                    waveIndex = this.sampleRepeatFrom + indexWithinRepeat;
-                } else {
-                    // sample has ended
-                    return {
-                        frequency: 440,
-                        volume: 0,
-                        waveform: [
-                            15,15,15,15, 15,15,15,15, 15,15,15,15, 15,15,15,15,
-                            0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,
-                        ],
-                    };
-                }
-
-                const result = {
-                    frequency: Math.round(frequency * this.sampleFrequencies[waveIndex]),
-                    volume: this.sampleVolumes[waveIndex],
-                    waveform: this.sampleWaveforms[waveIndex].split('').map((c) => c.charCodeAt(0) - 65),
-                };
-                return result;
+            let waveIndex;
+            if (time < this.sampleVolumes.length) {
+                waveIndex = time;
+            } else if (this.sampleRepeatFrom > 0) {
+                const indexWithinRepeat = (time - this.sampleVolumes.length) % this.sampleRepeatLength;
+                waveIndex = this.sampleRepeatFrom + indexWithinRepeat;
             } else {
-                const phaseCentre = (this.phaseMin + this.phaseMax) / 2;
-                const phaseAmplitude = (this.phaseMax - this.phaseMin) / 2;
-                const phase = phaseCentre - phaseAmplitude * Math.cos(frame * 2 * Math.PI / this.phasePeriod);
-                let waveFunc;
-                switch (this.waveType) {
-                    case waveType.SQUARE:
-                        waveFunc = i => i < phase ? 7.5 : -7.5;
-                        break;
-                    case waveType.TRIANGLE:
-                        waveFunc = i => i < phase ? 15 * i / phase - 7.5 : 15 * (32 - i) / (32 - phase) - 7.5;
-                        break;
-                    case waveType.SINE:
-                        waveFunc = i => 7.5 * Math.sin(Math.PI * i / 16);
-                        break;
-                    default:
-                        throw new Error("Unknown wave type");
-                }
-                for (let i = 0; i < 32; i++) {
-                    let tot = 0;
-                    for (let h = 0; h < 8; h++) {
-                        const harmonic = this.harmonics[h];
-                        tot += harmonic * waveFunc(i * (h + 1) % 32);
-                    }
-                    waveform[i] = Math.min(Math.max(0, Math.round(7.5 + tot)), 15);
-                }
+                // sample has ended
+                return {
+                    frequency: 440,
+                    volume: 0,
+                    waveform: [
+                        15,15,15,15, 15,15,15,15, 15,15,15,15, 15,15,15,15,
+                        0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,
+                    ],
+                };
             }
 
-            const finalFrequency = (
-                frequency
-                + this.vibratoDepth * Math.sin(frame * 2 * Math.PI / this.vibratoPeriod)
-                + frame * this.slideStep / 16
-            );
-
-            const volume = Math.round(
-                this.initialVolume >= this.decayTo ?
-                Math.max(this.decayTo, this.initialVolume - (frame * this.decaySpeed / 16)) :
-                Math.min(this.decayTo, this.initialVolume + (frame * this.decaySpeed / 16))
-            );
-
-            return {
-                frequency: Math.min(Math.max(1, Math.round(finalFrequency)), 4095),
-                volume: volume,
-                waveform,
+            const result = {
+                frequency: Math.round(noteFrequency * this.sampleFrequencies[waveIndex]),
+                volume: this.sampleVolumes[waveIndex],
+                waveform: this.sampleWaveforms[waveIndex].split('').map((c) => c.charCodeAt(0) - 65),
             };
+            return result;
+        } else {
+            const phaseCentre = (this.phaseMin + this.phaseMax) / 2;
+            const phaseAmplitude = (this.phaseMax - this.phaseMin) / 2;
+            const phase = phaseCentre - phaseAmplitude * Math.cos(time * 2 * Math.PI / this.phasePeriod);
+            let waveFunc;
+            switch (this.waveType) {
+                case waveType.SQUARE:
+                    waveFunc = i => i < phase ? 7.5 : -7.5;
+                    break;
+                case waveType.TRIANGLE:
+                    waveFunc = i => i < phase ? 15 * i / phase - 7.5 : 15 * (32 - i) / (32 - phase) - 7.5;
+                    break;
+                case waveType.SINE:
+                    waveFunc = i => 7.5 * Math.sin(Math.PI * i / 16);
+                    break;
+                default:
+                    throw new Error("Unknown wave type");
+            }
+            for (let i = 0; i < 32; i++) {
+                let tot = 0;
+                for (let h = 0; h < 8; h++) {
+                    const harmonic = this.harmonics[h];
+                    tot += harmonic * waveFunc(i * (h + 1) % 32);
+                }
+                waveform[i] = Math.min(Math.max(0, Math.round(7.5 + tot)), 15);
+            }
         }
+
+        const finalFrequency = (
+            noteFrequency
+            + this.vibratoDepth * Math.sin(time * 2 * Math.PI / this.vibratoPeriod)
+            + time * this.slideStep / 16
+        );
+
+        const volume = Math.round(
+            this.initialVolume >= this.decayTo ?
+            Math.max(this.decayTo, this.initialVolume - (time * this.decaySpeed / 16)) :
+            Math.min(this.decayTo, this.initialVolume + (time * this.decaySpeed / 16))
+        );
+
+        return {
+            frequency: Math.min(Math.max(1, Math.round(finalFrequency)), 4095),
+            volume: volume,
+            waveform,
+        };
+    }
+
+    getFrameCallback(frequency) {
+        return (time) => {
+            return this.getFrame(frequency, time);
+        };
     }
 
     getLuaCode() {

@@ -76,7 +76,7 @@ const openSong = (newSong) => {
     instrumentPanel.trackModel(song);
     ornamentPanel.trackModel(song);
     songEditor.trackModel(song);
-    audio.song = song;
+    audio.setSong(song);
     editorState.pattern = 0;
     patternGrid.trackModel(song.patterns[editorState.pattern]);
 }

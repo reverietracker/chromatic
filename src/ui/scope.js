@@ -5,10 +5,8 @@ export class Scope extends Component {
         super();
         this.width = 256;
         this.height = 128;
-        this.waveformGenerator = null;
         this._scrubControlNode = null;
         this.changeHandler = () => {
-            this.waveformGenerator = this.model.getFrameCallback(440);
             this.drawAtScrubPosition();
         }
     }
@@ -67,8 +65,8 @@ export class Scope extends Component {
     }
 
     drawAtScrubPosition() {
-        if (!this._scrubControlNode || !this.waveformGenerator) return;
-        const frameData = this.waveformGenerator(this._scrubControlNode.value);
+        if (!this._scrubControlNode || !this.model) return;
+        const frameData = this.model.getFrame(440, this._scrubControlNode.value);
         this.drawFrame(frameData);
     }
 }

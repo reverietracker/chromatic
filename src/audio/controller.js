@@ -18,10 +18,16 @@ export class AudioController extends EventEmitter {
 
         for (let i = 0; i < 4; i++) {
             this.channelStates[i] = {
-                instrumentNumber: 1,
-                instrumentCallback: null,
+                instrument: null,
                 instrumentFrame: 0,
+                note: null,
             };
+        }
+    }
+    setSong(song) {
+        this.song = song;
+        for (let i = 0; i < 4; i++) {
+            this.channelStates[i].instrument = this.song.instruments[1];
         }
     }
     play(frameCallback) {
@@ -63,30 +69,26 @@ export class AudioController extends EventEmitter {
         this.emit('stop');
     }
     playInstrument(instrument, frequency) {
-        const instrumentFrameCallback = instrument.getFrameCallback(frequency);
         const frameCallback = (frameNumber) => {
-            return [instrumentFrameCallback(frameNumber)];
+            return [instrument.getFrame(frequency, frameNumber)];
         }
         this.play(frameCallback);
     }
     clearChannelStates() {
         for (let i = 0; i < 4; i++) {
-            this.channelStates[i].instrumentCallback = null;
             this.channelStates[i].instrumentFrame = 0;
+            this.channelStates[i].note = null;
         }
     }
     readRow(pattern, rowNumber) {
         if (!this.song) return;
         for (let chan = 0; chan < 4; chan++) {
             const row = pattern.channels[chan].rows[rowNumber];
-            const note = row.note;
-            if (note !== 0) {
-                const frequency = NOTES_BY_NUM[note].frequency;
+            if (row.note !== 0) {
+                this.channelStates[chan].note = row.note;
                 if (row.instrument) {
-                    this.channelStates[chan].instrumentNumber = row.instrument;
+                    this.channelStates[chan].instrument = this.song.instruments[row.instrument];
                 }
-                const instrument = this.song.instruments[this.channelStates[chan].instrumentNumber];
-                this.channelStates[chan].instrumentCallback = instrument.getFrameCallback(frequency);
                 this.channelStates[chan].instrumentFrame = 0;
             }
         }
@@ -95,10 +97,11 @@ export class AudioController extends EventEmitter {
         this.clearChannelStates();
         this.readRow(pattern, rowNumber);
         const frameCallback = () => {
-            return this.channelStates.map((state) => (
-                state.instrumentCallback ?
-                state.instrumentCallback(state.instrumentFrame++) : null
-            ));
+            return this.channelStates.map((state) => {
+                if (!state.instrument || !state.note) return null;
+                const frequency = NOTES_BY_NUM[state.note].frequency;
+                return state.instrument.getFrame(frequency, state.instrumentFrame++);
+            });
         };
         this.play(frameCallback);
     }
@@ -119,10 +122,11 @@ export class AudioController extends EventEmitter {
                     rowNumber = 0;
                 }
             }
-            return this.channelStates.map((state) => (
-                state.instrumentCallback ?
-                state.instrumentCallback(state.instrumentFrame++) : null
-            ));
+            return this.channelStates.map((state) => {
+                if (!state.instrument || !state.note) return null;
+                const frequency = NOTES_BY_NUM[state.note].frequency;
+                return state.instrument.getFrame(frequency, state.instrumentFrame++);
+            });
         };
         this.isPlaying = true;
         this.play(frameCallback);
@@ -152,10 +156,11 @@ export class AudioController extends EventEmitter {
                     this.emit('position', positionNumber);
                 }
             }
-            return this.channelStates.map((state) => (
-                state.instrumentCallback ?
-                state.instrumentCallback(state.instrumentFrame++) : null
-            ));
+            return this.channelStates.map((state) => {
+                if (!state.instrument || !state.note) return null;
+                const frequency = NOTES_BY_NUM[state.note].frequency;
+                return state.instrument.getFrame(frequency, state.instrumentFrame++);
+            });
         };
         this.isPlaying = true;
         this.play(frameCallback);
