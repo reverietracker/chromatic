@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { TICSynth } from './ticsynth';
-import { NOTES_BY_NUM } from '../engines/chromatic/defs';
+import { MAX_NOTE_NUM, NOTES_BY_NUM, ORNAMENT_COUNT } from '../engines/chromatic/defs';
 
 export class AudioController extends EventEmitter {
     constructor() {
@@ -21,6 +21,7 @@ export class AudioController extends EventEmitter {
                 instrument: null,
                 instrumentFrame: 0,
                 note: null,
+                ornament: null,
             };
         }
     }
@@ -90,18 +91,36 @@ export class AudioController extends EventEmitter {
                     this.channelStates[chan].instrument = this.song.instruments[row.instrument];
                 }
                 this.channelStates[chan].instrumentFrame = 0;
+                if (row.effect == 0x0a && row.parameter <= ORNAMENT_COUNT) {
+                    this.channelStates[chan].ornament = this.song.ornaments[row.parameter];
+                } else {
+                    this.channelStates[chan].ornament = null;
+                }
             }
         }
+    }
+    getFrameFromState() {
+        return this.channelStates.map((state) => {
+            if (!state.instrument || !state.note) return null;
+            let note = state.note;
+            if (state.ornament) {
+                const ornamentFrame = state.instrumentFrame % state.ornament.length;
+                note += state.ornament.pitches[ornamentFrame];
+                if (note < 1) {
+                    note = 1;
+                } else if (note > MAX_NOTE_NUM) {
+                    note = MAX_NOTE_NUM;
+                }
+            }
+            const frequency = NOTES_BY_NUM[note].frequency;
+            return state.instrument.getFrame(frequency, state.instrumentFrame++);
+        });
     }
     playRow(pattern, rowNumber) {
         this.clearChannelStates();
         this.readRow(pattern, rowNumber);
         const frameCallback = () => {
-            return this.channelStates.map((state) => {
-                if (!state.instrument || !state.note) return null;
-                const frequency = NOTES_BY_NUM[state.note].frequency;
-                return state.instrument.getFrame(frequency, state.instrumentFrame++);
-            });
+            return this.getFrameFromState();
         };
         this.play(frameCallback);
     }
@@ -122,11 +141,7 @@ export class AudioController extends EventEmitter {
                     rowNumber = 0;
                 }
             }
-            return this.channelStates.map((state) => {
-                if (!state.instrument || !state.note) return null;
-                const frequency = NOTES_BY_NUM[state.note].frequency;
-                return state.instrument.getFrame(frequency, state.instrumentFrame++);
-            });
+            return this.getFrameFromState();
         };
         this.isPlaying = true;
         this.play(frameCallback);
@@ -156,11 +171,7 @@ export class AudioController extends EventEmitter {
                     this.emit('position', positionNumber);
                 }
             }
-            return this.channelStates.map((state) => {
-                if (!state.instrument || !state.note) return null;
-                const frequency = NOTES_BY_NUM[state.note].frequency;
-                return state.instrument.getFrame(frequency, state.instrumentFrame++);
-            });
+            return this.getFrameFromState();
         };
         this.isPlaying = true;
         this.play(frameCallback);
