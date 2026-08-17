@@ -1,5 +1,5 @@
 import { Model, fields } from 'catwalk';
-import { NOTE_NUMS_BY_NAME, NOTES_BY_NUM } from '../defs';
+import { NOTE_NUMS_BY_NAME, NOTES_BY_NUM, ORNAMENT_COUNT } from '../defs';
 
 class NoteField extends fields.IntegerField {
     serialize(val) {
@@ -58,7 +58,15 @@ export class Channel extends Model([
 ]) {
     getLuaData(instrumentsMap, patternLength) {
         const rowData = this.rows.slice(0, patternLength).map((row) => {
-            return `{${row.note},${row.instrument == 0 ? 0 : instrumentsMap[row.instrument]}}`;
+            let hasValidEffect = false;
+            if (row.effect == 0x0a && row.parameter > 0 && row.parameter <= ORNAMENT_COUNT) {
+                hasValidEffect = true;
+            }
+            if (hasValidEffect) {
+                return `{${row.note},${row.instrument == 0 ? 0 : instrumentsMap[row.instrument]},${row.effect},${row.parameter}}`;
+            } else {
+                return `{${row.note},${row.instrument == 0 ? 0 : instrumentsMap[row.instrument]}}`;
+            }
         }).join(",");
         return `  {${rowData}}`;
     }
@@ -71,6 +79,16 @@ export class Channel extends Model([
             }
         }
         return instruments;
+    }
+    usedOrnaments(patternLength) {
+        /* Return a Set of ornament numbers used in this channel */
+        const ornaments = new Set();
+        for (const row of this.rows.slice(0, patternLength)) {
+            if (row.effect == 0x0a && row.parameter <= ORNAMENT_COUNT) {
+                ornaments.add(row.parameter);
+            }
+        }
+        return ornaments;
     }
     isEmpty() {
         for (const row of this.rows) {
@@ -119,6 +137,16 @@ ${channelsData}
             }
         }
         return instruments;
+    }
+    usedOrnaments() {
+        /* Return a Set of ornament numbers used in this pattern */
+        const ornaments = new Set();
+        for (const channel of this.channels) {
+            for (const orn of channel.usedOrnaments(this.length)) {
+                ornaments.add(orn);
+            }
+        }
+        return ornaments;
     }
     isEmpty() {
         for (const channel of this.channels) {

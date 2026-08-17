@@ -28,4 +28,8 @@ export class Ornament extends Model([
         }
         return super.fromData(data);
     }
+    getLuaData() {
+        const pitches = this.pitches.slice(0, this.length);
+        return `{${pitches.join(",")}}`;
+    }
 }

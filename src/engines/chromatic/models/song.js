@@ -13,7 +13,7 @@ end
 
 chan_states={}
 for i=0,3 do
- chan_states[i]={inst=1,iframe=0,nfreq=440}
+ chan_states[i]={inst=0,iframe=0,note=0,orn=0}
 end
 
 row_frame=0
@@ -30,16 +30,21 @@ fetch_position()
 
 function read_row()
  for c=0,3 do
-  note=patterns[pattern_num][c+1][row_num+1]
-  note_num=note[1]
+  row=patterns[pattern_num][c+1][row_num+1]
+  note_num=row[1]
   if note_num~=0 then
    chan=chan_states[c]
-   inst=note[2]
+   inst=row[2]
    if inst~=0 then
     chan.inst=inst
    end
+   if row[3]==0x0a then
+    chan.orn=row[4]
+   else
+    chan.orn=0
+   end
    chan.iframe=0
-   chan.nfreq=note_freqs[note_num]
+   chan.note=note_num
   end
  end
  row_num=row_num+1
@@ -57,7 +62,19 @@ function music_frame()
  for c=0,3 do
   chan=chan_states[c]
   if chan.inst~=0 then
-   instruments[chan.inst](c,15,chan.nfreq,chan.iframe)
+   note=chan.note
+   if chan.orn~=0 then
+    orn=ornaments[chan.orn]
+    note=note+orn[(chan.iframe%#orn)+1]
+    if note<1 then
+     note=1
+    end
+    if note>107 then
+     note=107
+    end
+   end
+   nfreq=note_freqs[note]
+   instruments[chan.inst](c,15,nfreq,chan.iframe)
    chan.iframe=chan.iframe+1
   end
  end
@@ -112,6 +129,17 @@ export class Song extends Model([
         }
         return instruments;
     }
+    usedOrnaments() {
+        /* Return a Set of ornament numbers used in this song */
+        const ornaments = new Set();
+        for (const patternNumber of this.usedPatterns()) {
+            const pattern = this.patterns[patternNumber];
+            for (const orn of pattern.usedOrnaments()) {
+                ornaments.add(orn);
+            };
+        }
+        return ornaments;
+    }
     getLuaCode() {
         const exportedPatterns = [];
         const patternMap = {};  // mapping of original pattern number to 1-indexed position in exportedPatterns
@@ -132,6 +160,13 @@ export class Song extends Model([
             instrumentsMap[instrumentNumber] = exportedInstruments.length;
         }
 
+        const exportedOrnaments = [];
+        for (const ornamentNumber of this.usedOrnaments()) {
+            const ornament = this.ornaments[ornamentNumber];
+            exportedOrnaments.push(` [${ornamentNumber}]=${ornament.getLuaData()}`);
+        }
+        const ornamentsData = exportedOrnaments.join(",\n");
+
         const patternsData = exportedPatterns.map((pattern) => {
             return pattern.getLuaData(instrumentsMap);
         }).join(",\n");
@@ -147,6 +182,9 @@ ${instrumentsCode}
 }
 patterns={
 ${patternsData}
+}
+ornaments={
+${ornamentsData}
 }
 positions={${positions.join(',')}}
 song_speed=${this.speed}
