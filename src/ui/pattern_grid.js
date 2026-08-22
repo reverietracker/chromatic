@@ -186,6 +186,7 @@ export class PatternGrid extends Component {
         this.audio = audio;
         this.editorState = null;
         this.cells = [];
+        this.clipboard = null;
 
         this.currentLength = 0;
 
@@ -290,6 +291,16 @@ export class PatternGrid extends Component {
                 e.preventDefault();
                 return;
             }
+            if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC') {
+                e.preventDefault();
+                this.copySelection(row, col);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.code === 'KeyV') {
+                e.preventDefault();
+                this.pasteClipboard(row, col);
+                return;
+            }
             const channelIndex = Math.floor(col / 5);
             const channelColumn = col % 5;
             if (channelColumn === 0 && e.key in this.noteKeyDownHandlers && !e.repeat) {
@@ -321,6 +332,53 @@ export class PatternGrid extends Component {
         });
 
         return this.grid.node;
+    }
+
+    // Falls back to the single channel/row under the cursor when there's no
+    // active drag-selection, so copy/paste work on a single cell too.
+    getEffectiveSelectionRange(row, col) {
+        return this.grid.selectionRange || {
+            rowStart: row,
+            rowEnd: row,
+            colStart: Math.floor(col / 5) * 5,
+            colEnd: Math.floor(col / 5) * 5 + 4,
+        };
+    }
+
+    copySelection(row, col) {
+        const range = this.getEffectiveSelectionRange(row, col);
+        const channelStart = range.colStart / 5;
+        const channelEnd = range.colEnd / 5;
+        const rows = [];
+        for (let r = range.rowStart; r <= range.rowEnd; r++) {
+            const rowData = [];
+            for (let c = channelStart; c <= channelEnd; c++) {
+                rowData.push({ ...this.model.channels[c].rows[r] });
+            }
+            rows.push(rowData);
+        }
+        this.clipboard = rows;
+    }
+
+    pasteClipboard(row, col) {
+        if (!this.clipboard) return;
+        const channelIndex = Math.floor(col / 5);
+        const channelCount = this.grid.columnCount / 5;
+        for (let i = 0; i < this.clipboard.length; i++) {
+            const destRow = row + i;
+            if (destRow >= this.grid.rowCount) break;
+            const rowData = this.clipboard[i];
+            for (let j = 0; j < rowData.length; j++) {
+                const destChannel = channelIndex + j;
+                if (destChannel >= channelCount) break;
+                const data = rowData[j];
+                const channel = this.model.channels[destChannel];
+                channel.setRow(destRow, 'note', data.note);
+                channel.setRow(destRow, 'instrument', data.instrument);
+                channel.setRow(destRow, 'effect', data.effect);
+                channel.setRow(destRow, 'parameter', data.parameter);
+            }
+        }
     }
 
     changeRowHandler = (channel, row, field, value) => {
