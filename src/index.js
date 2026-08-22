@@ -83,8 +83,12 @@ const openSong = (newSong) => {
 
 document.addEventListener('keydown', (e) => {
     if (e.code !== 'Space' || e.repeat) return;
+    // Note: BUTTON is deliberately not excluded here, so the shortcut still
+    // works when a toolbar button or position-list entry holds focus (e.g.
+    // right after clicking "Play Pattern"), rather than re-triggering that
+    // button's own native space-activated click.
     const activeTag = document.activeElement && document.activeElement.tagName;
-    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT' || activeTag === 'BUTTON') return;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
     if (!song) return;
     e.preventDefault();
     if (audio.isPlaying) {
