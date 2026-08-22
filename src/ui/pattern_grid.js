@@ -285,6 +285,11 @@ export class PatternGrid extends Component {
 
 
         this.grid.keyDown = (row, col, e) => {
+            if (e.shiftKey && !e.repeat && /^Digit[0-9]$/.test(e.code)) {
+                this.editorState.octave = parseInt(e.code.slice(5), 10);
+                e.preventDefault();
+                return;
+            }
             const channelIndex = Math.floor(col / 5);
             const channelColumn = col % 5;
             if (channelColumn === 0 && e.key in this.noteKeyDownHandlers && !e.repeat) {
