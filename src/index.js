@@ -81,6 +81,19 @@ const openSong = (newSong) => {
     patternGrid.trackModel(song.patterns[editorState.pattern]);
 }
 
+document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' || e.repeat) return;
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT' || activeTag === 'BUTTON') return;
+    if (!song) return;
+    e.preventDefault();
+    if (audio.isPlaying) {
+        audio.stop();
+    } else {
+        audio.playPattern(song.patterns[editorState.pattern]);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const masterVolumeControl = document.getElementById("master-volume");
     audio.setVolume(masterVolumeControl.value / 1000);
