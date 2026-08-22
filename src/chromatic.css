@@ -137,6 +137,12 @@ ul.menu li {
     outline: 1px solid black;
     background-color: #ffff88;
 }
+.pattern-grid td.selected {
+    background-color: #cce5ff;
+}
+.pattern-grid td.selected:focus {
+    background-color: #ffff88;
+}
 .pattern-grid .row-number {
     color: #444;
 }

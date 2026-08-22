@@ -9,6 +9,11 @@ class Grid {
         this.keyUp = null;
         this.activeRowIndex = null;
 
+        this.cursorRow = null;
+        this.cursorCol = null;
+        this.selectionRange = null;
+        this.shiftClickPending = false;
+
         this.node = (
             <table className="pattern-grid">
             </table>
@@ -27,6 +32,12 @@ class Grid {
                 });
                 cell.addEventListener('keyup', (e) => {
                     this.keyUpHandler(i, j, e);
+                });
+                cell.addEventListener('mousedown', (e) => {
+                    this.mouseDownHandler(i, j, e);
+                });
+                cell.addEventListener('focus', () => {
+                    this.focusHandler(i, j);
                 });
                 rowCells.push(cell);
             }
@@ -86,6 +97,64 @@ class Grid {
         if (this.keyUp) {
             this.keyUp();
         }
+    }
+
+    mouseDownHandler(row, col, e) {
+        if (e.shiftKey) {
+            // Prevent the browser's native shift-click text-selection behavior
+            // so only our synthetic cell-range selection is visible.
+            e.preventDefault();
+            if (this.cursorRow !== null) {
+                this.selectRange(this.cursorRow, this.cursorCol, row, col);
+                this.shiftClickPending = true;
+            } else {
+                this.clearSelection();
+            }
+            this.cells[row][col].focus();
+        } else {
+            this.clearSelection();
+        }
+    }
+
+    focusHandler(row, col) {
+        if (this.shiftClickPending) {
+            this.shiftClickPending = false;
+            return;
+        }
+        this.clearSelection();
+        this.cursorRow = row;
+        this.cursorCol = col;
+    }
+
+    // A channel's 5 columns (note, instrument, effect, parameter high/low) are
+    // always selected together as a single unit.
+    selectRange(row1, col1, row2, col2) {
+        this.clearSelection();
+
+        const channel1 = Math.floor(col1 / 5);
+        const channel2 = Math.floor(col2 / 5);
+        const rowStart = Math.min(row1, row2);
+        const rowEnd = Math.max(row1, row2);
+        const colStart = Math.min(channel1, channel2) * 5;
+        const colEnd = Math.max(channel1, channel2) * 5 + 4;
+
+        this.selectionRange = { rowStart, rowEnd, colStart, colEnd };
+        for (let row = rowStart; row <= rowEnd; row++) {
+            for (let col = colStart; col <= colEnd; col++) {
+                this.cells[row][col].classList.add('selected');
+            }
+        }
+    }
+
+    clearSelection() {
+        if (!this.selectionRange) return;
+        const { rowStart, rowEnd, colStart, colEnd } = this.selectionRange;
+        for (let row = rowStart; row <= rowEnd; row++) {
+            for (let col = colStart; col <= colEnd; col++) {
+                this.cells[row][col].classList.remove('selected');
+            }
+        }
+        this.selectionRange = null;
     }
 
     setCell(row, col, value) {
